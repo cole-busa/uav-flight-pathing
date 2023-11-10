@@ -14,7 +14,7 @@ namespace Game {
             this.explored = new bool[10, 10];
             explored[0, 0] = true;
             this.weights = new float[10, 10];
-            this.state = "GAME_ACTIVE";
+            this.state = "GAME_UNINFORMED";
             int randY = Random.Range(0, map.GetLength(0));
             int randX = Random.Range(0, map.GetLength(1));
             map[randY, randX] = 1;
@@ -26,7 +26,7 @@ namespace Game {
             this.explored = new bool[width, height];
             explored[0, 0] = true;
             this.weights = new float[width, height];
-            this.state = "GAME_ACTIVE";
+            this.state = "GAME_UNINFORMED";
             int randY = Random.Range(0, map.GetLength(0));
             int randX = Random.Range(0, map.GetLength(1));
             map[randY, randX] = 1;
