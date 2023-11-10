@@ -17,7 +17,7 @@ namespace Game {
             this.state = "GAME_ACTIVE";
             int randY = Random.Range(0, map.GetLength(0));
             int randX = Random.Range(0, map.GetLength(1));
-            map[Random.Range(0, randY), Random.Range(0, randX)] = 1;
+            map[randY, randX] = 1;
             Debug.Log("GOAL AT " + (randX, randY));
         }
 
@@ -29,7 +29,7 @@ namespace Game {
             this.state = "GAME_ACTIVE";
             int randY = Random.Range(0, map.GetLength(0));
             int randX = Random.Range(0, map.GetLength(1));
-            map[Random.Range(0, randY), Random.Range(0, randX)] = 1;
+            map[randY, randX] = 1;
             Debug.Log("GOAL AT " + (randX, randY));
         }
 
