@@ -18,44 +18,16 @@ namespace Game {
         }
 
         public int getPosX() {
-            return this.posX;
+            return posX;
         }
 
         public int getPosY() {
-            return this.posY;
+            return posY;
         }
 
-        public void move(string direction) {
-            switch (direction) {
-                case "UP LEFT":
-                    this.posX -= 1;
-                    this.posY -= 1;
-                    break;
-                case "UP":
-                    this.posY -= 1;
-                    break;
-                case "UP RIGHT":
-                    this.posX -= 1;
-                    this.posY += 1;
-                    break;
-                case "LEFT":
-                    this.posX -= 1;
-                    break;
-                case "RIGHT":
-                    this.posX += 1;
-                    break;
-                case "DOWN LEFT":
-                    this.posX -= 1;
-                    this.posY += 1;
-                    break;
-                case "DOWN":
-                    this.posY += 1;
-                    break;
-                case "DOWN RIGHT":
-                    this.posX += 1;
-                    this.posY += 1;
-                    break;
-            }
+        public void move((int x, int y) pos) {
+            posX = pos.x;
+            posY = pos.y;
         }
 
         public ArrayList adjacent(int[,] map) {
