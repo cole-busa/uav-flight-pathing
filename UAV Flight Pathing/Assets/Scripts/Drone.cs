@@ -94,7 +94,7 @@ namespace Game {
             return posList;
         }
 
-        public (int x, int y) findMove(int[,] map, bool[,] explored, float[,] weights, ArrayList adjacent) {
+        public (int x, int y) findMove(int[,] map, bool[,] explored, float[,] heuristics, ArrayList adjacent) {
             ArrayList move = new ArrayList();
             
             foreach ((int x, int y) pos in adjacent) {
@@ -104,8 +104,20 @@ namespace Game {
                     move.Add(pos);
                     break;
                 } else if (!explored[pos.y, pos.x]) {
-                    //Add unexplored positions
-                    move.Add(pos);
+                    if (move.Count != 0) {
+                        (int x, int y) firstMove = ((int x, int y)) move[0];
+                        float currentHeuristic = heuristics[pos.y, pos.x];
+                        float maxHeuristic = heuristics[firstMove.y, firstMove.x];
+                        if (currentHeuristic > maxHeuristic) {
+                            move.Clear();
+                            move.Add(pos);
+                        } else if (currentHeuristic == maxHeuristic) {
+                            move.Add(pos);
+                        }
+                    } else {
+                        //Add unexplored positions
+                        move.Add(pos);
+                    }
                 }
             }
             if (move.Count == 0) {

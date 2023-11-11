@@ -6,14 +6,14 @@ namespace Game {
     public class GameState {
         private int[,] map;
         private bool[,] explored;
-        private float[,] weights;
+        private float[,] heuristics;
         private string state;
 
         public GameState() {
             this.map = new int[10, 10];
             this.explored = new bool[10, 10];
             explored[0, 0] = true;
-            this.weights = new float[10, 10];
+            this.heuristics = new float[10, 10];
             this.state = "GAME_UNINFORMED";
             int randY = Random.Range(0, map.GetLength(0));
             int randX = Random.Range(0, map.GetLength(1));
@@ -25,7 +25,7 @@ namespace Game {
             this.map = new int[width, height];
             this.explored = new bool[width, height];
             explored[0, 0] = true;
-            this.weights = new float[width, height];
+            this.heuristics = new float[width, height];
             this.state = "GAME_UNINFORMED";
             int randY = Random.Range(0, map.GetLength(0));
             int randX = Random.Range(0, map.GetLength(1));
@@ -49,8 +49,8 @@ namespace Game {
             return this.explored;
         }
 
-        public float[,] getWeights() {
-            return this.weights;
+        public float[,] getHeuristics() {
+            return this.heuristics;
         }
 
         public void setState(string newState) {

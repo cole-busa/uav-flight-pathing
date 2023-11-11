@@ -12,7 +12,7 @@ namespace Game {
         private ArrayList movesPerIteration;
         // Start is called before the first frame update
         void Start() {
-            this.gameState = new GameState(20, 20);
+            this.gameState = new GameState(10, 10);
             this.drone = new Drone();
             this.movesPerIteration = new ArrayList();
             this.moveCount = 0;
@@ -28,17 +28,17 @@ namespace Game {
                 } else {
                     int[,] map = gameState.getMap();
                     bool[,] explored = gameState.getExplored();
-                    float[,] weights = gameState.getWeights();
+                    float[,] heuristics = gameState.getHeuristics();
                     ArrayList adjacent = drone.adjacent(map);
                     (int x, int y) decision = (0, 0);
-                    decision = drone.findMove(map, explored, weights, adjacent);
+                    decision = drone.findMove(map, explored, heuristics, adjacent);
                     drone.move(decision);
                     explored[decision.y, decision.x] = true;
                     moveCount++;
                     if (map[decision.y, decision.x] == 1) {
                         movesPerIteration.Add(moveCount);
                         moveCount = 0;
-                        gameState = new GameState(20, 20);
+                        gameState = new GameState(10, 10);
                         drone = new Drone();
                         iterations++;
                     }
