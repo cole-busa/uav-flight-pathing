@@ -93,5 +93,26 @@ namespace Game {
             }
             return posList;
         }
+
+        public (int x, int y) findMove(int[,] map, bool[,] explored, float[,] weights, ArrayList adjacent) {
+            ArrayList move = new ArrayList();
+            
+            foreach ((int x, int y) pos in adjacent) {
+                if (map[pos.y, pos.x] == 1) {
+                    //If adjacent to the goal
+                    move.Clear();
+                    move.Add(pos);
+                    break;
+                } else if (!explored[pos.y, pos.x]) {
+                    //Add unexplored positions
+                    move.Add(pos);
+                }
+            }
+            if (move.Count == 0) {
+                //If backed into a corner with all adjacent explored
+                move = adjacent;
+            }
+            return ((int x, int y))move[Random.Range(0, move.Count)];
+        }
     }
 }

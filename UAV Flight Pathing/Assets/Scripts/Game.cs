@@ -28,25 +28,10 @@ namespace Game {
                 } else {
                     int[,] map = gameState.getMap();
                     bool[,] explored = gameState.getExplored();
+                    float[,] weights = gameState.getWeights();
                     ArrayList adjacent = drone.adjacent(map);
-                    ArrayList move = new ArrayList();
                     (int x, int y) decision = (0, 0);
-                    foreach ((int x, int y) pos in adjacent) {
-                        if (map[pos.y, pos.x] == 1) {
-                            //If adjacent to the goal
-                            move.Clear();
-                            move.Add(pos);
-                            break;
-                        } else if (!explored[pos.y, pos.x]) {
-                            //Add unexplored positions
-                            move.Add(pos);
-                        }
-                    }
-                    if (move.Count == 0) {
-                        //If backed into a corner with all adjacent explored
-                        move = adjacent;
-                    }
-                    decision = ((int x, int y))move[Random.Range(0, move.Count)];
+                    decision = drone.findMove(map, explored, weights, adjacent);
                     drone.move(decision);
                     explored[decision.y, decision.x] = true;
                     moveCount++;
