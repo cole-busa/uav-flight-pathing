@@ -8,28 +8,40 @@ namespace Game {
         private bool[,] explored;
         private float[,] heuristics;
         private string state;
+        private int width;
+        private int height;
+        private (int x, int y) goal;
 
         public GameState() {
-            this.map = new int[10, 10];
-            this.explored = new bool[10, 10];
+            this.width = 10;
+            this.height = 10;
+            this.map = new int[width, height];
+            this.explored = new bool[width, height];
             explored[0, 0] = true;
             this.heuristics = new float[10, 10];
             this.state = "GAME_UNINFORMED";
             int randY = Random.Range(0, map.GetLength(0));
             int randX = Random.Range(0, map.GetLength(1));
             map[randY, randX] = 1;
+            goal = (randX, randY);
             Debug.Log("GOAL AT " + (randX, randY));
         }
 
-        public GameState(int height, int width) {
+        public GameState(int height, int width, string state) {
+            this.width = width;
+            this.height = height;
             this.map = new int[width, height];
             this.explored = new bool[width, height];
             explored[0, 0] = true;
             this.heuristics = new float[width, height];
-            this.state = "GAME_UNINFORMED";
+            this.state = state;
             int randY = Random.Range(0, map.GetLength(0));
             int randX = Random.Range(0, map.GetLength(1));
             map[randY, randX] = 1;
+            goal = (randX, randY);
+            if (state == "GAME_INFORMED") {
+                setManhattanDistanceHeuristic();
+            }
             Debug.Log("GOAL AT " + (randX, randY));
         }
 
@@ -55,6 +67,18 @@ namespace Game {
 
         public void setState(string newState) {
             this.state = newState;
+        }
+
+        public void setNoHeuristic() {
+            heuristics = new float[width, height];
+        }
+
+        public void setManhattanDistanceHeuristic() {
+            for (int x = 0; x < heuristics.GetLength(1); x++) {
+                for (int y = 0; y < heuristics.GetLength(0); y++) {
+                    heuristics[y, x] = Mathf.Abs(x - goal.x) + Mathf.Abs(y - goal.y);
+                }
+            }
         }
     }
 }

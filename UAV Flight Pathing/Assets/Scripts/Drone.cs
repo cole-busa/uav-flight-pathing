@@ -107,11 +107,11 @@ namespace Game {
                     if (move.Count != 0) {
                         (int x, int y) firstMove = ((int x, int y)) move[0];
                         float currentHeuristic = heuristics[pos.y, pos.x];
-                        float maxHeuristic = heuristics[firstMove.y, firstMove.x];
-                        if (currentHeuristic > maxHeuristic) {
+                        float minHeuristic = heuristics[firstMove.y, firstMove.x];
+                        if (currentHeuristic < minHeuristic) {
                             move.Clear();
                             move.Add(pos);
-                        } else if (currentHeuristic == maxHeuristic) {
+                        } else if (currentHeuristic == minHeuristic) {
                             move.Add(pos);
                         }
                     } else {
