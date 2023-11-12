@@ -100,7 +100,7 @@ namespace Game {
             return posList;
         }
 
-        public (int x, int y) findMove(int[,] map, bool[,] explored, float[,] heuristics, ArrayList adjacent) {
+        public (int x, int y) findMove(int[,] map, bool[,] droneExplored, float[,] heuristics, ArrayList adjacent) {
             ArrayList move = new ArrayList();
             
             foreach ((int x, int y) pos in adjacent) {
@@ -109,7 +109,7 @@ namespace Game {
                     move.Clear();
                     move.Add(pos);
                     break;
-                } else if (!explored[pos.y, pos.x]) {
+                } else if (!droneExplored[pos.y, pos.x]) {
                     if (move.Count != 0) {
                         (int x, int y) firstMove = ((int x, int y)) move[0];
                         float currentHeuristic = heuristics[pos.y, pos.x];

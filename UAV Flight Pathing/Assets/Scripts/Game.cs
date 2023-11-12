@@ -13,14 +13,18 @@ namespace Game {
         private ArrayList movesPerIteration;
         private ArrayList drones;
         private bool start;
+        private int width;
+        private int height;
 
         void ResetIteration(string state) {
-            gameState = new GameState(10, 10, state);
-            drone = new Drone(10, 10);
+            gameState = new GameState(width, height, state);
+            drone = new Drone(width, height);
             moveCount = 0;
         }
         // Start is called before the first frame update
         void Start() {
+            width = 20;
+            height = 20;
             ResetIteration("GAME_SOLO_UNINFORMED");
             movesPerIteration = new ArrayList();
             drones = new ArrayList();
@@ -67,12 +71,10 @@ namespace Game {
             } else if (gameState.getState() == "GAME_MULTI_UNINFORMED") {
                 if (start) {
                     start = false;
-                    Debug.Log("multi test");
                     for (int i = 0; i < droneCount; i++) {
-                        Drone n = new Drone(10, 10);
+                        Drone n = new Drone(width, height);
                         drones.Add(n);
                     }
-                    Debug.Log(drones.Count);
                 }
                 if (iterations == maxIterations) {
                     int averageMoves = findAverageMoves();
@@ -80,6 +82,9 @@ namespace Game {
                     gameState.setState("GAME_MULTI_INFORMED");
                     movesPerIteration = new ArrayList();
                     iterations = 0;
+                    for (int i = 0; i < drones.Count; i++) {
+                        drones[i] = new Drone(width, height);
+                    }
                 } else {
                     int[,] map = gameState.getMap();
                     float[,] heuristics = gameState.getHeuristics();
@@ -92,11 +97,10 @@ namespace Game {
                         d.move(decision);
                         explored[decision.y, decision.x] = true;
                         if (map[decision.y, decision.x] == 1) {
-                            Debug.Log("FOUND IN  " + moveCount + " MOVES");
                             movesPerIteration.Add(moveCount);
                             ResetIteration("GAME_MULTI_UNINFORMED");
                             for (int i = 0; i < drones.Count; i++) {
-                                drones[i] = new Drone(10, 10);
+                                drones[i] = new Drone(width, height);
                             }
                             iterations++;
                             break;
@@ -112,16 +116,22 @@ namespace Game {
                     int[,] map = gameState.getMap();
                     bool[,] explored = gameState.getGlobalExplored();
                     float[,] heuristics = gameState.getHeuristics();
-                    ArrayList adjacent = drone.adjacent(map);
-                    (int x, int y) decision = (0, 0);
-                    decision = drone.findMove(map, explored, heuristics, adjacent);
-                    drone.move(decision);
-                    explored[decision.y, decision.x] = true;
                     moveCount++;
-                    if (map[decision.y, decision.x] == 1) {
-                        movesPerIteration.Add(moveCount);
-                        ResetIteration("GAME_MULTI_INFORMED");
-                        iterations++;
+                    foreach (Drone d in drones) {
+                        ArrayList adjacent = d.adjacent(map);
+                        (int x, int y) decision = (0, 0);
+                        decision = d.findMove(map, explored, heuristics, adjacent);
+                        d.move(decision);
+                        explored[decision.y, decision.x] = true;
+                        if (map[decision.y, decision.x] == 1) {
+                            movesPerIteration.Add(moveCount);
+                            ResetIteration("GAME_MULTI_INFORMED");
+                            iterations++;
+                            for (int i = 0; i < drones.Count; i++) {
+                                drones[i] = new Drone(width, height);
+                            }
+                            break;
+                        }
                     }
                 }
             } if (gameState.getState() == "GAME_WIN") {
