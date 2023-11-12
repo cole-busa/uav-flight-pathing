@@ -19,6 +19,15 @@ namespace Game {
             explored[0, 0] = true;
         }
 
+        public Drone(int width, int height, int posX, int posY) {
+            this.posX = posX;
+            this.posY = posY;
+            this.width = width;
+            this.height = height;
+            this.explored = new bool[width, height];
+            explored[0, 0] = true;
+        }
+
         public int getPosX() {
             return posX;
         }
@@ -130,6 +139,7 @@ namespace Game {
                 //If backed into a corner with all adjacent explored
                 move = adjacent;
             }
+            //Choose randomly between equivalent moves
             return ((int x, int y))move[Random.Range(0, move.Count)];
         }
     }

@@ -12,7 +12,7 @@ namespace Game {
         private int height;
         private (int x, int y) goal;
 
-        /*public GameState() {
+        public GameState() {
             this.width = 10;
             this.height = 10;
             this.map = new int[width, height];
@@ -24,7 +24,7 @@ namespace Game {
             int randX = Random.Range(0, map.GetLength(1));
             map[randY, randX] = 1;
             goal = (randX, randY);
-        }*/
+        }
 
         public GameState(int height, int width, string state) {
             this.width = width;
