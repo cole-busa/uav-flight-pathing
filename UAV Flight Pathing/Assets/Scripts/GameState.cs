@@ -5,7 +5,7 @@ using UnityEngine;
 namespace Game {
     public class GameState {
         private int[,] map;
-        private bool[,] explored;
+        private bool[,] globalExplored;
         private float[,] heuristics;
         private string state;
         private int width;
@@ -16,33 +16,31 @@ namespace Game {
             this.width = 10;
             this.height = 10;
             this.map = new int[width, height];
-            this.explored = new bool[width, height];
-            explored[0, 0] = true;
+            this.globalExplored = new bool[width, height];
+            globalExplored[0, 0] = true;
             this.heuristics = new float[10, 10];
-            this.state = "GAME_UNINFORMED";
+            this.state = "GAME_SOLO_UNINFORMED";
             int randY = Random.Range(0, map.GetLength(0));
             int randX = Random.Range(0, map.GetLength(1));
             map[randY, randX] = 1;
             goal = (randX, randY);
-            Debug.Log("GOAL AT " + (randX, randY));
         }
 
         public GameState(int height, int width, string state) {
             this.width = width;
             this.height = height;
             this.map = new int[width, height];
-            this.explored = new bool[width, height];
-            explored[0, 0] = true;
+            this.globalExplored = new bool[width, height];
+            globalExplored[0, 0] = true;
             this.heuristics = new float[width, height];
             this.state = state;
             int randY = Random.Range(0, map.GetLength(0));
             int randX = Random.Range(0, map.GetLength(1));
             map[randY, randX] = 1;
             goal = (randX, randY);
-            if (state == "GAME_INFORMED") {
+            if (state == "GAME_MULTI_INFORMED") {
                 setManhattanDistanceHeuristic();
             }
-            Debug.Log("GOAL AT " + (randX, randY));
         }
 
         public void setGoalPos(int posX, int posY) {
@@ -57,8 +55,8 @@ namespace Game {
             return this.map;
         }
 
-        public bool[,] getExplored() {
-            return this.explored;
+        public bool[,] getGlobalExplored() {
+            return this.globalExplored;
         }
 
         public float[,] getHeuristics() {

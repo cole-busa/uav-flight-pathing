@@ -9,19 +9,25 @@ namespace Game {
         private int moveCount;
         private int iterations;
         private int maxIterations;
+        private int droneCount;
         private ArrayList movesPerIteration;
+        private ArrayList drones;
+        private bool start;
 
         void ResetIteration(string state) {
             gameState = new GameState(10, 10, state);
-            drone = new Drone();
+            drone = new Drone(10, 10);
             moveCount = 0;
         }
         // Start is called before the first frame update
         void Start() {
-            ResetIteration("GAME_UNINFORMED");
+            ResetIteration("GAME_SOLO_UNINFORMED");
             movesPerIteration = new ArrayList();
+            drones = new ArrayList();
             iterations = 0;
             maxIterations = 10;
+            droneCount = 4;
+            start = true;
         }
 
         int findAverageMoves() {
@@ -35,16 +41,16 @@ namespace Game {
 
         // Update is called once per frame
         void FixedUpdate() {
-            if (gameState.getState() == "GAME_UNINFORMED") {
+            if (gameState.getState() == "GAME_SOLO_UNINFORMED") {
                 if (iterations == maxIterations) {
                     int averageMoves = findAverageMoves();
                     Debug.Log("THE UNINFORMED DRONE FOUND THE GOAL IN " + averageMoves + " AVERAGE MOVES!");
-                    ResetIteration("GAME_INFORMED");
+                    ResetIteration("GAME_MULTI_UNINFORMED");
                     movesPerIteration = new ArrayList();
                     iterations = 0;
                 } else {
                     int[,] map = gameState.getMap();
-                    bool[,] explored = gameState.getExplored();
+                    bool[,] explored = gameState.getGlobalExplored();
                     float[,] heuristics = gameState.getHeuristics();
                     ArrayList adjacent = drone.adjacent(map);
                     (int x, int y) decision = (0, 0);
@@ -54,18 +60,57 @@ namespace Game {
                     moveCount++;
                     if (map[decision.y, decision.x] == 1) {
                         movesPerIteration.Add(moveCount);
-                        ResetIteration("GAME_UNINFORMED");
+                        ResetIteration("GAME_SOLO_UNINFORMED");
                         iterations++;
                     }
                 }
-            } else if (gameState.getState() == "GAME_INFORMED") {
+            } else if (gameState.getState() == "GAME_MULTI_UNINFORMED") {
+                if (start) {
+                    start = false;
+                    Debug.Log("multi test");
+                    for (int i = 0; i < droneCount; i++) {
+                        Drone n = new Drone(10, 10);
+                        drones.Add(n);
+                    }
+                    Debug.Log(drones.Count);
+                }
                 if (iterations == maxIterations) {
                     int averageMoves = findAverageMoves();
-                    Debug.Log("THE INFORMED DRONE FOUND THE GOAL IN " + averageMoves + " AVERAGE MOVES!");
+                    Debug.Log("THE UNINFORMED DRONES FOUND THE GOAL IN " + averageMoves + " AVERAGE MOVES!");
+                    gameState.setState("GAME_MULTI_INFORMED");
+                    movesPerIteration = new ArrayList();
+                    iterations = 0;
+                } else {
+                    int[,] map = gameState.getMap();
+                    float[,] heuristics = gameState.getHeuristics();
+                    moveCount++;
+                    foreach (Drone d in drones) {
+                        bool[,] explored = d.getExplored();
+                        ArrayList adjacent = d.adjacent(map);
+                        (int x, int y) decision = (0, 0);
+                        decision = d.findMove(map, explored, heuristics, adjacent);
+                        d.move(decision);
+                        explored[decision.y, decision.x] = true;
+                        if (map[decision.y, decision.x] == 1) {
+                            Debug.Log("FOUND IN  " + moveCount + " MOVES");
+                            movesPerIteration.Add(moveCount);
+                            ResetIteration("GAME_MULTI_UNINFORMED");
+                            for (int i = 0; i < drones.Count; i++) {
+                                drones[i] = new Drone(10, 10);
+                            }
+                            iterations++;
+                            break;
+                        }
+                    }
+                }
+            } else if (gameState.getState() == "GAME_MULTI_INFORMED") {
+                if (iterations == maxIterations) {
+                    int averageMoves = findAverageMoves();
+                    Debug.Log("THE INFORMED DRONES FOUND THE GOAL IN " + averageMoves + " AVERAGE MOVES!");
                     gameState.setState("GAME_WIN");
                 } else {
                     int[,] map = gameState.getMap();
-                    bool[,] explored = gameState.getExplored();
+                    bool[,] explored = gameState.getGlobalExplored();
                     float[,] heuristics = gameState.getHeuristics();
                     ArrayList adjacent = drone.adjacent(map);
                     (int x, int y) decision = (0, 0);
@@ -75,7 +120,7 @@ namespace Game {
                     moveCount++;
                     if (map[decision.y, decision.x] == 1) {
                         movesPerIteration.Add(moveCount);
-                        ResetIteration("GAME_INFORMED");
+                        ResetIteration("GAME_MULTI_INFORMED");
                         iterations++;
                     }
                 }

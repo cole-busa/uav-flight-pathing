@@ -6,15 +6,17 @@ namespace Game {
     public class Drone {
         private int posX;
         private int posY;
+        private int width;
+        private int height;
+        private bool[,] explored;
 
-        public Drone() {
+        public Drone(int width, int height) {
             this.posX = 0;
             this.posY = 0;
-        }
-
-        public Drone(int posX, int posY) {
-            this.posX = posX;
-            this.posY = posY;
+            this.width = width;
+            this.height = height;
+            this.explored = new bool[width, height];
+            explored[0, 0] = true;
         }
 
         public int getPosX() {
@@ -23,6 +25,10 @@ namespace Game {
 
         public int getPosY() {
             return posY;
+        }
+
+        public bool[,] getExplored() {
+            return explored;
         }
 
         public void move((int x, int y) pos) {
