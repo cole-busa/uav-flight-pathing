@@ -38,8 +38,8 @@ namespace Game {
             int randX = Random.Range(0, map.GetLength(1));
             map[randY, randX] = 1;
             goal = (randX, randY);
-            if (state == "GAME_MULTI_INFORMED") {
-                setManhattanDistanceHeuristic();
+            if (state == "GAME_MULTI_PERFECT_INFORMED") {
+                setManhattanDistanceHeuristic("perfect");
             }
         }
 
@@ -71,10 +71,14 @@ namespace Game {
             heuristics = new float[width, height];
         }
 
-        public void setManhattanDistanceHeuristic() {
+        public void setManhattanDistanceHeuristic(string accuracy) {
             for (int x = 0; x < heuristics.GetLength(1); x++) {
                 for (int y = 0; y < heuristics.GetLength(0); y++) {
-                    heuristics[y, x] = Mathf.Abs(x - goal.x) + Mathf.Abs(y - goal.y);
+                    float random = 0;
+                    if (accuracy == "decent") {
+                        random = Random.Range(0, 1);
+                    }
+                    heuristics[y, x] = Mathf.Abs(x - goal.x) + Mathf.Abs(y - goal.y) + random;
                 }
             }
         }

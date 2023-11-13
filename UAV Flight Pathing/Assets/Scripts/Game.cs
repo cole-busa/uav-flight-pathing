@@ -38,8 +38,8 @@ namespace Game {
                 soloUninformedGame();
             } else if (gameState.getState() == "GAME_MULTI_UNINFORMED") {
                 multiUninformedGame();
-            } else if (gameState.getState() == "GAME_MULTI_INFORMED") {
-                multiInformedGame();
+            } else if (gameState.getState() == "GAME_MULTI_PERFECT_INFORMED") {
+                multiPerfectInformedGame();
             } else if (gameState.getState() == "GAME_WIN") {
                 gameState.setState("GAME_OVER");
             }
@@ -108,7 +108,7 @@ namespace Game {
             if (iterations == maxIterations) {
                 int averageMoves = findAverageMoves();
                 Debug.Log("THE UNINFORMED DRONES FOUND THE GOAL IN " + averageMoves + " AVERAGE MOVES!");
-                gameState.setState("GAME_MULTI_INFORMED");
+                gameState.setState("GAME_MULTI_PERFECT_INFORMED");
                 movesPerIteration = new ArrayList();
                 iterations = 0;
                 for (int i = 0; i < drones.Count; i++) {
@@ -133,10 +133,10 @@ namespace Game {
             }
         }
 
-        //The Multi Informed Scenario involves four drones that all start at (0, 0)
-        //and choose between adjacent tiles based on the Manhattan Distance of each tile 
+        //The Multi Perfect Informed Scenario involves four drones that all start at (0, 0)
+        //and choose between adjacent tiles based on the perfect Manhattan Distance of each tile 
         //and the goal. They also avoid tiles all of them have explored (shared memory).
-        void multiInformedGame() {
+        void multiPerfectInformedGame() {
             if (iterations == maxIterations) {
                 int averageMoves = findAverageMoves();
                 Debug.Log("THE INFORMED DRONES FOUND THE GOAL IN " + averageMoves + " AVERAGE MOVES!");
@@ -153,7 +153,7 @@ namespace Game {
                     d.move(decision);
                     explored[decision.y, decision.x] = true;
                     if (map[decision.y, decision.x] == 1) {
-                        ResetIteration("GAME_MULTI_INFORMED");
+                        ResetIteration("GAME_MULTI_PERFECT_INFORMED");
                         break;
                     }
                 }
