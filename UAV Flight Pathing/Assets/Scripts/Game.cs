@@ -19,8 +19,8 @@ namespace Game {
 
         // Start is called before the first frame update
         void Start() {
-            width = 10;
-            height = 10;
+            width = 20;
+            height = 20;
             gameState = new GameState(width, height, "GAME_SOLO_UNINFORMED");
             drone = new Drone(width, height);
             moveCount = 0;
@@ -40,6 +40,8 @@ namespace Game {
                 multiUninformedGame();
             } else if (gameState.getState() == "GAME_MULTI_PERFECT_INFORMED") {
                 multiPerfectInformedGame();
+            } else if (gameState.getState() == "GAME_MULTI_DECENT_INFORMED") {
+                multiDecentInformedGame();
             } else if (gameState.getState() == "GAME_WIN") {
                 gameState.setState("GAME_OVER");
             }
@@ -63,8 +65,8 @@ namespace Game {
                 drone = new Drone(width, height);
             } else {
                 for (int i = 0; i < drones.Count; i++) {
-                            drones[i] = new Drone(width, height);
-                        }
+                    drones[i] = new Drone(width, height);
+                }
             }
             moveCount = 0;
             iterations++;
@@ -139,8 +141,13 @@ namespace Game {
         void multiPerfectInformedGame() {
             if (iterations == maxIterations) {
                 int averageMoves = findAverageMoves();
-                Debug.Log("THE INFORMED DRONES FOUND THE GOAL IN " + averageMoves + " AVERAGE MOVES!");
-                gameState.setState("GAME_WIN");
+                Debug.Log("THE PERFECTLY INFORMED DRONES FOUND THE GOAL IN " + averageMoves + " AVERAGE MOVES!");
+                gameState.setState("GAME_MULTI_DECENT_INFORMED");
+                movesPerIteration = new ArrayList();
+                iterations = 0;
+                for (int i = 0; i < drones.Count; i++) {
+                    drones[i] = new Drone(width, height);
+                }
             } else {
                 int[,] map = gameState.getMap();
                 bool[,] explored = gameState.getGlobalExplored();
@@ -154,6 +161,34 @@ namespace Game {
                     explored[decision.y, decision.x] = true;
                     if (map[decision.y, decision.x] == 1) {
                         ResetIteration("GAME_MULTI_PERFECT_INFORMED");
+                        break;
+                    }
+                }
+            }
+        }
+
+
+        //The Multi Perfect Informed Scenario involves four drones that all start at (0, 0)
+        //and choose between adjacent tiles based on the decent Manhattan Distance (plus or minus random noise) 
+        //of each tile and the goal. They also avoid tiles all of them have explored (shared memory).
+        void multiDecentInformedGame() {
+            if (iterations == maxIterations) {
+                int averageMoves = findAverageMoves();
+                Debug.Log("THE DECENTLY INFORMED DRONES FOUND THE GOAL IN " + averageMoves + " AVERAGE MOVES!");
+                gameState.setState("GAME_WIN");
+            } else {
+                int[,] map = gameState.getMap();
+                bool[,] explored = gameState.getGlobalExplored();
+                float[,] heuristics = gameState.getHeuristics();
+                moveCount++;
+                foreach (Drone d in drones) {
+                    ArrayList adjacent = d.adjacent(map);
+                    (int x, int y) decision = (0, 0);
+                    decision = d.findMove(map, explored, heuristics, adjacent);
+                    d.move(decision);
+                    explored[decision.y, decision.x] = true;
+                    if (map[decision.y, decision.x] == 1) {
+                        ResetIteration("GAME_MULTI_DECENT_INFORMED");
                         break;
                     }
                 }

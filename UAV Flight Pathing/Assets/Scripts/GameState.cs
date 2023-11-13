@@ -40,6 +40,8 @@ namespace Game {
             goal = (randX, randY);
             if (state == "GAME_MULTI_PERFECT_INFORMED") {
                 setManhattanDistanceHeuristic("perfect");
+            } else if (state == "GAME_MULTI_DECENT_INFORMED") {
+                setManhattanDistanceHeuristic("decent");
             }
         }
 
@@ -76,7 +78,8 @@ namespace Game {
                 for (int y = 0; y < heuristics.GetLength(0); y++) {
                     float random = 0;
                     if (accuracy == "decent") {
-                        random = Random.Range(0, 1);
+                        random = Random.Range(-5.0f, 5.0f);
+                        Debug.Log(random);
                     }
                     heuristics[y, x] = Mathf.Abs(x - goal.x) + Mathf.Abs(y - goal.y) + random;
                 }
