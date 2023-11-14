@@ -42,8 +42,12 @@ namespace Game {
                 multiUninformedCornerGame();
             } else if (gameState.getState() == "GAME_MULTI_ORIGIN_PERFECTLY_INFORMED") {
                 multiPerfectlyInformedOriginGame();
+            } else if (gameState.getState() == "GAME_MULTI_CORNER_PERFECTLY_INFORMED") {
+                multiPerfectlyInformedCornerGame();
             } else if (gameState.getState() == "GAME_MULTI_ORIGIN_DECENTLY_INFORMED") {
                 multiDecentlyInformedOriginGame();
+            } else if (gameState.getState() == "GAME_MULTI_CORNER_DECENTLY_INFORMED") {
+                multiDecentlyInformedCornerGame();
             } else if (gameState.getState() == "GAME_WIN") {
                 gameState.setState("GAME_OVER");
             }
@@ -174,19 +178,20 @@ namespace Game {
             }
         }
 
-        //The Multi Origin Perfect Informed scenario involves four drones that all start at (0, 0)
+        //The Multi Origin Perfectly Informed scenario involves four drones that all start at (0, 0)
         //and choose between adjacent tiles based on the perfect Manhattan Distance of each tile 
         //and the goal. They also avoid tiles all of them have explored (shared memory).
         void multiPerfectlyInformedOriginGame() {
             if (iterations == maxIterations) {
                 int averageMoves = findAverageMoves();
-                Debug.Log("THE PERFECTLY INFORMED DRONES FOUND THE GOAL IN " + averageMoves + " AVERAGE MOVES!");
-                gameState.setState("GAME_MULTI_ORIGIN_DECENTLY_INFORMED");
+                Debug.Log("THE PERFECTLY INFORMED DRONES AT ORIGIN FOUND THE GOAL IN " + averageMoves + " AVERAGE MOVES!");
+                gameState.setState("GAME_MULTI_CORNER_PERFECTLY_INFORMED");
                 movesPerIteration = new ArrayList();
                 iterations = 0;
-                for (int i = 0; i < drones.Count; i++) {
-                    drones[i] = new Drone(width, height);
-                }
+                drones[0] = new Drone(width, height, 0, 0);
+                drones[1] = new Drone(width, height, width - 1, 0);
+                drones[2] = new Drone(width, height, 0, height - 1);
+                drones[3] = new Drone(width, height, width - 1, height - 1);
             } else {
                 int[,] map = gameState.getMap();
                 bool[,] explored = gameState.getGlobalExplored();
@@ -206,6 +211,38 @@ namespace Game {
             }
         }
 
+        //The Multi Corner Perfectly Informed scenario involves four drones that start at each of the corners
+        //and choose between adjacent tiles based on the perfect Manhattan Distance of each tile 
+        //and the goal. They also avoid tiles all of them have explored (shared memory).
+        void multiPerfectlyInformedCornerGame() {
+            if (iterations == maxIterations) {
+                int averageMoves = findAverageMoves();
+                Debug.Log("THE PERFECTLY INFORMED DRONES AT CORNERS FOUND THE GOAL IN " + averageMoves + " AVERAGE MOVES!");
+                gameState.setState("GAME_MULTI_ORIGIN_DECENTLY_INFORMED");
+                movesPerIteration = new ArrayList();
+                iterations = 0;
+                for (int i = 0; i < drones.Count; i++) {
+                    drones[i] = new Drone(width, height);
+                }
+            } else {
+                int[,] map = gameState.getMap();
+                bool[,] explored = gameState.getGlobalExplored();
+                float[,] heuristics = gameState.getHeuristics();
+                moveCount++;
+                foreach (Drone d in drones) {
+                    ArrayList adjacent = d.adjacent(map);
+                    (int x, int y) decision = (0, 0);
+                    decision = d.findMove(map, explored, heuristics, adjacent);
+                    d.move(decision);
+                    explored[decision.y, decision.x] = true;
+                    if (map[decision.y, decision.x] == 1) {
+                        ResetIteration("GAME_MULTI_CORNER_PERFECTLY_INFORMED");
+                        break;
+                    }
+                }
+            }
+        }
+
 
         //The Multi Origin Decently Informed scenario involves four drones that all start at (0, 0)
         //and choose between adjacent tiles based on the decent Manhattan Distance (plus or minus random noise) 
@@ -213,8 +250,14 @@ namespace Game {
         void multiDecentlyInformedOriginGame() {
             if (iterations == maxIterations) {
                 int averageMoves = findAverageMoves();
-                Debug.Log("THE DECENTLY INFORMED DRONES FOUND THE GOAL IN " + averageMoves + " AVERAGE MOVES!");
-                gameState.setState("GAME_WIN");
+                Debug.Log("THE DECENTLY INFORMED DRONES AT ORIGIN FOUND THE GOAL IN " + averageMoves + " AVERAGE MOVES!");
+                gameState.setState("GAME_MULTI_CORNER_DECENTLY_INFORMED");
+                movesPerIteration = new ArrayList();
+                iterations = 0;
+                drones[0] = new Drone(width, height, 0, 0);
+                drones[1] = new Drone(width, height, width - 1, 0);
+                drones[2] = new Drone(width, height, 0, height - 1);
+                drones[3] = new Drone(width, height, width - 1, height - 1);
             } else {
                 int[,] map = gameState.getMap();
                 bool[,] explored = gameState.getGlobalExplored();
@@ -228,6 +271,33 @@ namespace Game {
                     explored[decision.y, decision.x] = true;
                     if (map[decision.y, decision.x] == 1) {
                         ResetIteration("GAME_MULTI_ORIGIN_DECENTLY_INFORMED");
+                        break;
+                    }
+                }
+            }
+        }
+
+        //The Multi Corner Decently Informed scenario involves four drones that start at each of the corners
+        //and choose between adjacent tiles based on the decent Manhattan Distance (plus or minus random noise) 
+        //of each tile and the goal. They also avoid tiles all of them have explored (shared memory).
+        void multiDecentlyInformedCornerGame() {
+            if (iterations == maxIterations) {
+                int averageMoves = findAverageMoves();
+                Debug.Log("THE DECENTLY INFORMED DRONES AT CORNERS FOUND THE GOAL IN " + averageMoves + " AVERAGE MOVES!");
+                gameState.setState("GAME_WIN");
+            } else {
+                int[,] map = gameState.getMap();
+                bool[,] explored = gameState.getGlobalExplored();
+                float[,] heuristics = gameState.getHeuristics();
+                moveCount++;
+                foreach (Drone d in drones) {
+                    ArrayList adjacent = d.adjacent(map);
+                    (int x, int y) decision = (0, 0);
+                    decision = d.findMove(map, explored, heuristics, adjacent);
+                    d.move(decision);
+                    explored[decision.y, decision.x] = true;
+                    if (map[decision.y, decision.x] == 1) {
+                        ResetIteration("GAME_MULTI_CORNER_DECENTLY_INFORMED");
                         break;
                     }
                 }
