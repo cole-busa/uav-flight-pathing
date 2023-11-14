@@ -79,7 +79,6 @@ namespace Game {
                     float random = 0;
                     if (accuracy == "decent") {
                         random = Random.Range(-5.0f, 5.0f);
-                        Debug.Log(random);
                     }
                     heuristics[y, x] = Mathf.Abs(x - goal.x) + Mathf.Abs(y - goal.y) + random;
                 }
