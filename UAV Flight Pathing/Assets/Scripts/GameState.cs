@@ -38,10 +38,12 @@ namespace Game {
             int randX = Random.Range(0, map.GetLength(1));
             map[randY, randX] = 1;
             goal = (randX, randY);
-            if (state == "GAME_MULTI_PERFECT_INFORMED") {
+            if (state == "GAME_MULTI_ORIGIN_MANHATTAN_INFORMED") {
                 setManhattanDistanceHeuristic("perfect");
-            } else if (state == "GAME_MULTI_DECENT_INFORMED") {
-                setManhattanDistanceHeuristic("decent");
+            } else if (state == "GAME_MULTI_ORIGIN_EUCLIDEAN_INFORMED" || state == "GAME_MULTI_CORNER_PERFECTLY_INFORMED") {
+                setEuclideanDistanceHeuristic("perfect");
+            } else if (state.Contains("DECENTLY")) {
+                setEuclideanDistanceHeuristic("decent");
             }
         }
 
@@ -81,6 +83,18 @@ namespace Game {
                         random = Random.Range(-5.0f, 5.0f);
                     }
                     heuristics[y, x] = Mathf.Abs(x - goal.x) + Mathf.Abs(y - goal.y) + random;
+                }
+            }
+        }
+
+        public void setEuclideanDistanceHeuristic(string accuracy) {
+            for (int x = 0; x < heuristics.GetLength(1); x++) {
+                for (int y = 0; y < heuristics.GetLength(0); y++) {
+                    float random = 0;
+                    if (accuracy == "decent") {
+                        random = Random.Range(-5.0f, 5.0f);
+                    }
+                    heuristics[y, x] = Mathf.Sqrt(Mathf.Pow(x - goal.x, 2) + Mathf.Pow(y - goal.y,2)) + random;
                 }
             }
         }

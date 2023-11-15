@@ -19,8 +19,8 @@ namespace Game {
 
         // Start is called before the first frame update
         void Start() {
-            width = 10;
-            height = 10;
+            width = 20;
+            height = 20;
             gameState = new GameState(width, height, "GAME_SOLO_UNINFORMED");
             drone = new Drone(width, height);
             moveCount = 0;
@@ -40,8 +40,10 @@ namespace Game {
                 multiUninformedOriginGame();
             } else if (gameState.getState() == "GAME_MULTI_CORNER_UNINFORMED") {
                 multiUninformedCornerGame();
-            } else if (gameState.getState() == "GAME_MULTI_ORIGIN_PERFECTLY_INFORMED") {
-                multiPerfectlyInformedOriginGame();
+            } else if (gameState.getState() == "GAME_MULTI_ORIGIN_MANHATTAN_INFORMED") {
+                multiManhattanInformedOriginGame();
+            } else if (gameState.getState() == "GAME_MULTI_ORIGIN_EUCLIDEAN_INFORMED") {
+                multiEuclideanInformedOriginGame();
             } else if (gameState.getState() == "GAME_MULTI_CORNER_PERFECTLY_INFORMED") {
                 multiPerfectlyInformedCornerGame();
             } else if (gameState.getState() == "GAME_MULTI_ORIGIN_DECENTLY_INFORMED") {
@@ -153,7 +155,7 @@ namespace Game {
             if (iterations == maxIterations) {
                 int averageMoves = findAverageMoves();
                 Debug.Log("THE UNINFORMED DRONES AT CORNERS FOUND THE GOAL IN " + averageMoves + " AVERAGE MOVES!");
-                gameState.setState("GAME_MULTI_ORIGIN_PERFECTLY_INFORMED");
+                gameState.setState("GAME_MULTI_ORIGIN_MANHATTAN_INFORMED");
                 movesPerIteration = new ArrayList();
                 iterations = 0;
                 for (int i = 0; i < drones.Count; i++) {
@@ -178,13 +180,45 @@ namespace Game {
             }
         }
 
-        //The Multi Origin Perfectly Informed scenario involves four drones that all start at (0, 0)
+        //The Multi Origin Manhattan Informed scenario involves four drones that all start at (0, 0)
         //and choose between adjacent tiles based on the perfect Manhattan Distance of each tile 
         //and the goal. They also avoid tiles all of them have explored (shared memory).
-        void multiPerfectlyInformedOriginGame() {
+        void multiManhattanInformedOriginGame() {
             if (iterations == maxIterations) {
                 int averageMoves = findAverageMoves();
-                Debug.Log("THE PERFECTLY INFORMED DRONES AT ORIGIN FOUND THE GOAL IN " + averageMoves + " AVERAGE MOVES!");
+                Debug.Log("THE PERFECTLY INFORMED MANHATTAN DRONES AT ORIGIN FOUND THE GOAL IN " + averageMoves + " AVERAGE MOVES!");
+                gameState.setState("GAME_MULTI_ORIGIN_EUCLIDEAN_INFORMED");
+                movesPerIteration = new ArrayList();
+                iterations = 0;
+                for (int i = 0; i < drones.Count; i++) {
+                    drones[i] = new Drone(width, height);
+                }
+            } else {
+                int[,] map = gameState.getMap();
+                bool[,] explored = gameState.getGlobalExplored();
+                float[,] heuristics = gameState.getHeuristics();
+                moveCount++;
+                foreach (Drone d in drones) {
+                    ArrayList adjacent = d.adjacent(map);
+                    (int x, int y) decision = (0, 0);
+                    decision = d.findMove(map, explored, heuristics, adjacent);
+                    d.move(decision);
+                    explored[decision.y, decision.x] = true;
+                    if (map[decision.y, decision.x] == 1) {
+                        ResetIteration("GAME_MULTI_ORIGIN_MANHATTAN_INFORMED");
+                        break;
+                    }
+                }
+            }
+        }
+
+        //The Multi Origin Euclidean Informed scenario involves four drones that all start at (0, 0)
+        //and choose between adjacent tiles based on the perfect Euclidean Distance of each tile 
+        //and the goal. They also avoid tiles all of them have explored (shared memory).
+        void multiEuclideanInformedOriginGame() {
+            if (iterations == maxIterations) {
+                int averageMoves = findAverageMoves();
+                Debug.Log("THE PERFECTLY INFORMED EUCLIDEAN DRONES AT ORIGIN FOUND THE GOAL IN " + averageMoves + " AVERAGE MOVES!");
                 gameState.setState("GAME_MULTI_CORNER_PERFECTLY_INFORMED");
                 movesPerIteration = new ArrayList();
                 iterations = 0;
@@ -204,7 +238,7 @@ namespace Game {
                     d.move(decision);
                     explored[decision.y, decision.x] = true;
                     if (map[decision.y, decision.x] == 1) {
-                        ResetIteration("GAME_MULTI_ORIGIN_PERFECTLY_INFORMED");
+                        ResetIteration("GAME_MULTI_ORIGIN_EUCLIDEAN_INFORMED");
                         break;
                     }
                 }
