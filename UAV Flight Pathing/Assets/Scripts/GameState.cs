@@ -41,9 +41,13 @@ namespace Game {
             if (state == "GAME_MULTI_ORIGIN_MANHATTAN_INFORMED") {
                 setManhattanDistanceHeuristic("perfect");
             } else if (state == "GAME_MULTI_ORIGIN_EUCLIDEAN_INFORMED" || state == "GAME_MULTI_CORNER_PERFECTLY_INFORMED") {
-                setEuclideanDistanceHeuristic("perfect");
+                setEuclideanDistanceHeuristic("perfect", (0,0));
             } else if (state.Contains("DECENTLY")) {
-                setEuclideanDistanceHeuristic("decent");
+                setEuclideanDistanceHeuristic("decent", (0, 0));
+            } else if (state.Contains("BADLY")) {
+                randY = Random.Range(0, map.GetLength(0));
+                randX = Random.Range(0, map.GetLength(1));
+                setEuclideanDistanceHeuristic("bad", (randX, randY));
             }
         }
 
@@ -87,7 +91,10 @@ namespace Game {
             }
         }
 
-        public void setEuclideanDistanceHeuristic(string accuracy) {
+        public void setEuclideanDistanceHeuristic(string accuracy, (int x, int y) target) {
+            if (accuracy == "bad") {
+                goal = target;
+            }
             for (int x = 0; x < heuristics.GetLength(1); x++) {
                 for (int y = 0; y < heuristics.GetLength(0); y++) {
                     float random = 0;
