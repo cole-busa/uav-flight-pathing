@@ -12,46 +12,68 @@ namespace Game {
         private int droneCount;
         private ArrayList movesPerIteration;
         private ArrayList drones;
-        private bool start;
         private int width;
         private int height;
 
 
         // Start is called before the first frame update
         void Start() {
+            //Game settings
             width = 20;
             height = 20;
+            droneCount = 4;
+            maxIterations = 10;
+
+            //Game initialization
             gameState = new GameState(width, height, "GAME_SOLO_UNINFORMED");
             drone = new Drone(width, height);
-            moveCount = 0;
-            movesPerIteration = new ArrayList();
             drones = new ArrayList();
+            for (int i = 0; i < droneCount; i++) {
+                Drone n = new Drone(width, height);
+                drones.Add(n);
+            }
+            movesPerIteration = new ArrayList();
+            moveCount = 0;
             iterations = 0;
-            maxIterations = 10;
-            droneCount = 4;
-            start = true;
         }
 
         // Update is called once per frame
         void FixedUpdate() {
-            if (gameState.getState() == "GAME_SOLO_UNINFORMED") {
-                soloUninformedGame();
-            } else if (gameState.getState() == "GAME_MULTI_ORIGIN_UNINFORMED") {
-                multiUninformedOriginGame();
-            } else if (gameState.getState() == "GAME_MULTI_CORNER_UNINFORMED") {
-                multiUninformedCornerGame();
-            } else if (gameState.getState() == "GAME_MULTI_ORIGIN_MANHATTAN_INFORMED") {
-                multiManhattanInformedOriginGame();
-            } else if (gameState.getState() == "GAME_MULTI_ORIGIN_EUCLIDEAN_INFORMED") {
-                multiEuclideanInformedOriginGame();
-            } else if (gameState.getState() == "GAME_MULTI_CORNER_PERFECTLY_INFORMED") {
-                multiPerfectlyInformedCornerGame();
-            } else if (gameState.getState() == "GAME_MULTI_CORNER_DECENTLY_INFORMED") {
-                multiDecentlyInformedCornerGame();
-            } else if (gameState.getState() == "GAME_MULTI_CORNER_BADLY_INFORMED") {
-                multiBadlyInformedCornerGame();
-            } else if (gameState.getState() == "GAME_WIN") {
-                gameState.setState("GAME_OVER");
+            string state = gameState.getState();
+            switch (state) {
+                case "GAME_SOLO_UNINFORMED":
+                    soloUninformedGame();
+                    break;
+                case "GAME_MULTI_ORIGIN_UNINFORMED":
+                    multiUninformedOriginGame();
+                    break;
+                case "GAME_MULTI_CORNER_UNINFORMED":
+                    multiUninformedCornerGame();
+                    break;
+                case "GAME_MULTI_RANDOM_UNINFORMED":
+                    multiUninformedRandomGame();
+                    break;
+                case "GAME_MULTI_RANDOM_QUADRANT_UNINFORMED":
+                    multiUninformedRandomQuadrantGame();
+                    break;
+                case "GAME_MULTI_ORIGIN_MANHATTAN_INFORMED":
+                    multiManhattanInformedOriginGame();
+                    break;
+                case "GAME_MULTI_ORIGIN_EUCLIDEAN_INFORMED":
+                    multiEuclideanInformedOriginGame();
+                    break;
+                case "GAME_MULTI_CORNER_PERFECTLY_INFORMED":
+                    multiPerfectlyInformedCornerGame();
+                    break;
+                case "GAME_MULTI_CORNER_DECENTLY_INFORMED":
+                    multiDecentlyInformedCornerGame();
+                    break;
+                case "GAME_MULTI_CORNER_BADLY_INFORMED":
+                    multiBadlyInformedCornerGame();
+                    break;
+                case "GAME_WIN":
+                    gameState.setState("GAME_OVER");
+                    break;
             }
         }
 
@@ -66,8 +88,15 @@ namespace Game {
         }
 
         //Helper function to reset the current iteration
-        void ResetIteration(string state) {
-            movesPerIteration.Add(moveCount);
+        void ResetIteration(string state, bool hardReset) {
+            if (hardReset) {
+                movesPerIteration = new ArrayList();
+                iterations = 0;
+            } else {
+                movesPerIteration.Add(moveCount);
+                iterations++;
+            }
+            moveCount = 0;
             gameState = new GameState(width, height, state);
             if (state == "GAME_SOLO_UNINFORMED") {
                 drone = new Drone(width, height);
@@ -80,9 +109,19 @@ namespace Game {
                 drones[1] = new Drone(width, height, width - 1, 0);
                 drones[2] = new Drone(width, height, 0, height - 1);
                 drones[3] = new Drone(width, height, width - 1, height - 1);
+            } else if (state.Contains("RANDOM")) {
+                if (state.Contains("QUADRANT")) {
+                    drones[0] = new Drone(width, height, Random.Range(0, width/2), Random.Range(0, height/2));
+                    drones[1] = new Drone(width, height, Random.Range(width/2, width), Random.Range(0, height/2));
+                    drones[2] = new Drone(width, height, Random.Range(0, width/2), Random.Range(height/2, height));
+                    drones[3] = new Drone(width, height, Random.Range(width/2, width), Random.Range(height/2, height));
+                } else {
+                    for (int i = 0; i < drones.Count; i++) {
+                        drones[i] = new Drone(width, height, Random.Range(0, width), Random.Range(0, height));
+                    }
+                }
             }
-            moveCount = 0;
-            iterations++;
+            
         }
 
         //The Solo Uninformed scenario involves one drone that starts at (0, 0)
@@ -91,9 +130,7 @@ namespace Game {
             if (iterations == maxIterations) {
                 int averageMoves = findAverageMoves();
                 Debug.Log("THE UNINFORMED DRONE AT ORIGIN FOUND THE GOAL IN " + averageMoves + " AVERAGE MOVES!");
-                ResetIteration("GAME_MULTI_ORIGIN_UNINFORMED");
-                movesPerIteration = new ArrayList();
-                iterations = 0;
+                ResetIteration("GAME_MULTI_ORIGIN_UNINFORMED", true);
             } else {
                 int[,] map = gameState.getMap();
                 bool[,] explored = gameState.getGlobalExplored();
@@ -105,7 +142,7 @@ namespace Game {
                 explored[decision.y, decision.x] = true;
                 moveCount++;
                 if (map[decision.y, decision.x] == 1) {
-                    ResetIteration("GAME_SOLO_UNINFORMED");
+                    ResetIteration("GAME_SOLO_UNINFORMED", false);
                 }
             }
         }
@@ -113,23 +150,10 @@ namespace Game {
         //The Multi Origin Uninformed scenario involves four drones that all start at (0, 0)
         //and choose randomly between adjacent tiles, only avoiding those each has explored (no shared memory).
         void multiUninformedOriginGame() {
-            if (start) {
-                start = false;
-                for (int i = 0; i < droneCount; i++) {
-                    Drone n = new Drone(width, height);
-                    drones.Add(n);
-                }
-            }
             if (iterations == maxIterations) {
                 int averageMoves = findAverageMoves();
                 Debug.Log("THE UNINFORMED DRONES AT ORIGIN FOUND THE GOAL IN " + averageMoves + " AVERAGE MOVES!");
-                gameState.setState("GAME_MULTI_CORNER_UNINFORMED");
-                movesPerIteration = new ArrayList();
-                iterations = 0;
-                drones[0] = new Drone(width, height, 0, 0);
-                drones[1] = new Drone(width, height, width - 1, 0);
-                drones[2] = new Drone(width, height, 0, height - 1);
-                drones[3] = new Drone(width, height, width - 1, height - 1);
+                ResetIteration("GAME_MULTI_CORNER_UNINFORMED", true);
             } else {
                 int[,] map = gameState.getMap();
                 float[,] heuristics = gameState.getHeuristics();
@@ -142,7 +166,7 @@ namespace Game {
                     d.move(decision);
                     explored[decision.y, decision.x] = true;
                     if (map[decision.y, decision.x] == 1) {
-                        ResetIteration("GAME_MULTI_ORIGIN_UNINFORMED");
+                        ResetIteration("GAME_MULTI_ORIGIN_UNINFORMED", false);
                         break;
                     }
                 }
@@ -155,12 +179,7 @@ namespace Game {
             if (iterations == maxIterations) {
                 int averageMoves = findAverageMoves();
                 Debug.Log("THE UNINFORMED DRONES AT CORNERS FOUND THE GOAL IN " + averageMoves + " AVERAGE MOVES!");
-                gameState.setState("GAME_MULTI_ORIGIN_MANHATTAN_INFORMED");
-                movesPerIteration = new ArrayList();
-                iterations = 0;
-                for (int i = 0; i < drones.Count; i++) {
-                    drones[i] = new Drone(width, height);
-                }
+                ResetIteration("GAME_MULTI_RANDOM_UNINFORMED", true);
             } else {
                 int[,] map = gameState.getMap();
                 float[,] heuristics = gameState.getHeuristics();
@@ -173,7 +192,59 @@ namespace Game {
                     d.move(decision);
                     explored[decision.y, decision.x] = true;
                     if (map[decision.y, decision.x] == 1) {
-                        ResetIteration("GAME_MULTI_CORNER_UNINFORMED");
+                        ResetIteration("GAME_MULTI_CORNER_UNINFORMED", false);
+                        break;
+                    }
+                }
+            }
+        }
+
+        //The Multi Corner Uninformed scenario involves four drones that start at random tiles
+        //and choose randomly between adjacent tiles, only avoiding those each has explored (no shared memory).
+        void multiUninformedRandomGame() {
+            if (iterations == maxIterations) {
+                int averageMoves = findAverageMoves();
+                Debug.Log("THE UNINFORMED DRONES AT RANDOM TILES FOUND THE GOAL IN " + averageMoves + " AVERAGE MOVES!");
+                ResetIteration("GAME_MULTI_RANDOM_QUADRANT_UNINFORMED", true);
+            } else {
+                int[,] map = gameState.getMap();
+                float[,] heuristics = gameState.getHeuristics();
+                moveCount++;
+                foreach (Drone d in drones) {
+                    bool[,] explored = d.getExplored();
+                    ArrayList adjacent = d.adjacent(map);
+                    (int x, int y) decision = (0, 0);
+                    decision = d.findMove(map, explored, heuristics, adjacent);
+                    d.move(decision);
+                    explored[decision.y, decision.x] = true;
+                    if (map[decision.y, decision.x] == 1) {
+                        ResetIteration("GAME_MULTI_RANDOM_UNINFORMED", false);
+                        break;
+                    }
+                }
+            }
+        }
+
+        //The Multi Corner Uninformed scenario involves four drones that start at random spots in each of the four quadrants
+        //and choose randomly between adjacent tiles, only avoiding those each has explored (no shared memory).
+        void multiUninformedRandomQuadrantGame() {
+            if (iterations == maxIterations) {
+                int averageMoves = findAverageMoves();
+                Debug.Log("THE UNINFORMED DRONES AT RANDOM TILES IN EACH QUADRANT FOUND THE GOAL IN " + averageMoves + " AVERAGE MOVES!");
+                ResetIteration("GAME_MULTI_ORIGIN_MANHATTAN_INFORMED", true);
+            } else {
+                int[,] map = gameState.getMap();
+                float[,] heuristics = gameState.getHeuristics();
+                moveCount++;
+                foreach (Drone d in drones) {
+                    bool[,] explored = d.getExplored();
+                    ArrayList adjacent = d.adjacent(map);
+                    (int x, int y) decision = (0, 0);
+                    decision = d.findMove(map, explored, heuristics, adjacent);
+                    d.move(decision);
+                    explored[decision.y, decision.x] = true;
+                    if (map[decision.y, decision.x] == 1) {
+                        ResetIteration("GAME_MULTI_RANDOM_QUADRANT_UNINFORMED", false);
                         break;
                     }
                 }
@@ -187,12 +258,7 @@ namespace Game {
             if (iterations == maxIterations) {
                 int averageMoves = findAverageMoves();
                 Debug.Log("THE PERFECTLY INFORMED MANHATTAN DRONES AT ORIGIN FOUND THE GOAL IN " + averageMoves + " AVERAGE MOVES!");
-                gameState.setState("GAME_MULTI_ORIGIN_EUCLIDEAN_INFORMED");
-                movesPerIteration = new ArrayList();
-                iterations = 0;
-                for (int i = 0; i < drones.Count; i++) {
-                    drones[i] = new Drone(width, height);
-                }
+                ResetIteration("GAME_MULTI_ORIGIN_EUCLIDEAN_INFORMED", true);
             } else {
                 int[,] map = gameState.getMap();
                 bool[,] explored = gameState.getGlobalExplored();
@@ -205,7 +271,7 @@ namespace Game {
                     d.move(decision);
                     explored[decision.y, decision.x] = true;
                     if (map[decision.y, decision.x] == 1) {
-                        ResetIteration("GAME_MULTI_ORIGIN_MANHATTAN_INFORMED");
+                        ResetIteration("GAME_MULTI_ORIGIN_MANHATTAN_INFORMED", false);
                         break;
                     }
                 }
@@ -219,13 +285,7 @@ namespace Game {
             if (iterations == maxIterations) {
                 int averageMoves = findAverageMoves();
                 Debug.Log("THE PERFECTLY INFORMED EUCLIDEAN DRONES AT ORIGIN FOUND THE GOAL IN " + averageMoves + " AVERAGE MOVES!");
-                gameState.setState("GAME_MULTI_CORNER_PERFECTLY_INFORMED");
-                movesPerIteration = new ArrayList();
-                iterations = 0;
-                drones[0] = new Drone(width, height, 0, 0);
-                drones[1] = new Drone(width, height, width - 1, 0);
-                drones[2] = new Drone(width, height, 0, height - 1);
-                drones[3] = new Drone(width, height, width - 1, height - 1);
+                ResetIteration("GAME_MULTI_CORNER_PERFECTLY_INFORMED", true);
             } else {
                 int[,] map = gameState.getMap();
                 bool[,] explored = gameState.getGlobalExplored();
@@ -238,7 +298,7 @@ namespace Game {
                     d.move(decision);
                     explored[decision.y, decision.x] = true;
                     if (map[decision.y, decision.x] == 1) {
-                        ResetIteration("GAME_MULTI_ORIGIN_EUCLIDEAN_INFORMED");
+                        ResetIteration("GAME_MULTI_ORIGIN_EUCLIDEAN_INFORMED", false);
                         break;
                     }
                 }
@@ -252,13 +312,7 @@ namespace Game {
             if (iterations == maxIterations) {
                 int averageMoves = findAverageMoves();
                 Debug.Log("THE PERFECTLY INFORMED DRONES AT CORNERS FOUND THE GOAL IN " + averageMoves + " AVERAGE MOVES!");
-                gameState.setState("GAME_MULTI_CORNER_DECENTLY_INFORMED");
-                movesPerIteration = new ArrayList();
-                iterations = 0;
-                drones[0] = new Drone(width, height, 0, 0);
-                drones[1] = new Drone(width, height, width - 1, 0);
-                drones[2] = new Drone(width, height, 0, height - 1);
-                drones[3] = new Drone(width, height, width - 1, height - 1);
+                ResetIteration("GAME_MULTI_CORNER_DECENTLY_INFORMED", true);
             } else {
                 int[,] map = gameState.getMap();
                 bool[,] explored = gameState.getGlobalExplored();
@@ -271,7 +325,7 @@ namespace Game {
                     d.move(decision);
                     explored[decision.y, decision.x] = true;
                     if (map[decision.y, decision.x] == 1) {
-                        ResetIteration("GAME_MULTI_CORNER_PERFECTLY_INFORMED");
+                        ResetIteration("GAME_MULTI_CORNER_PERFECTLY_INFORMED", false);
                         break;
                     }
                 }
@@ -285,12 +339,7 @@ namespace Game {
             if (iterations == maxIterations) {
                 int averageMoves = findAverageMoves();
                 Debug.Log("THE DECENTLY INFORMED DRONES AT CORNERS FOUND THE GOAL IN " + averageMoves + " AVERAGE MOVES!");
-                gameState.setState("GAME_MULTI_CORNER_BADLY_INFORMED");
-                movesPerIteration = new ArrayList();
-                iterations = 0;
-                for (int i = 0; i < drones.Count; i++) {
-                    drones[i] = new Drone(width, height);
-                }
+                ResetIteration("GAME_MULTI_CORNER_BADLY_INFORMED", true);
             } else {
                 int[,] map = gameState.getMap();
                 bool[,] explored = gameState.getGlobalExplored();
@@ -303,7 +352,7 @@ namespace Game {
                     d.move(decision);
                     explored[decision.y, decision.x] = true;
                     if (map[decision.y, decision.x] == 1) {
-                        ResetIteration("GAME_MULTI_CORNER_DECENTLY_INFORMED");
+                        ResetIteration("GAME_MULTI_CORNER_DECENTLY_INFORMED", false);
                         break;
                     }
                 }
@@ -330,7 +379,7 @@ namespace Game {
                     d.move(decision);
                     explored[decision.y, decision.x] = true;
                     if (map[decision.y, decision.x] == 1) {
-                        ResetIteration("GAME_MULTI_CORNER_BADLY_INFORMED");
+                        ResetIteration("GAME_MULTI_CORNER_BADLY_INFORMED", false);
                         break;
                     }
                 }
