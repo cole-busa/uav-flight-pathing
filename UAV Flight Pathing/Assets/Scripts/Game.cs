@@ -12,6 +12,8 @@ namespace Game {
         private int droneCount;
         private ArrayList movesPerIteration;
         private ArrayList drones;
+        private ArrayList states;
+        private int stateIndex;
         private int width;
         private int height;
 
@@ -35,46 +37,62 @@ namespace Game {
             movesPerIteration = new ArrayList();
             moveCount = 0;
             iterations = 0;
+
+            stateIndex = 0;
+            states = new ArrayList();
+
+            //The Solo Uninformed scenario involves one drone that starts at (0, 0)
+            //and chooses randomly between adjacent tiles, only avoiding those already explored.
+            states.Add("GAME_SOLO_UNINFORMED");
+
+            //The Multi Origin Uninformed scenario involves four drones that all start at (0, 0)
+            //and choose randomly between adjacent tiles, only avoiding those each has explored (no shared memory).
+            states.Add("GAME_MULTI_ORIGIN_UNINFORMED");
+
+            //The Multi Corner Uninformed scenario involves four drones that start at each of the corners
+            //and choose randomly between adjacent tiles, only avoiding those each has explored (no shared memory).
+            states.Add("GAME_MULTI_CORNER_UNINFORMED");
+
+            //The Multi Random Uninformed scenario involves four drones that start at random tiles
+            //and choose randomly between adjacent tiles, only avoiding those each has explored (no shared memory).
+            states.Add("GAME_MULTI_RANDOM_UNINFORMED");
+
+            //The Multi Random Quadrant Uninformed scenario involves four drones that start at random spots in each of the four quadrants
+            //and choose randomly between adjacent tiles, only avoiding those each has explored (no shared memory).
+            states.Add("GAME_MULTI_RANDOM_QUADRANT_UNINFORMED");
+
+            //The Multi Origin Manhattan Informed scenario involves four drones that all start at (0, 0)
+            //and choose between adjacent tiles based on the perfect Manhattan Distance of each tile 
+            //and the goal. They also avoid tiles all of them have explored (shared memory).
+            states.Add("GAME_MULTI_ORIGIN_MANHATTAN_INFORMED");
+
+            //The Multi Origin Euclidean Informed scenario involves four drones that all start at (0, 0)
+            //and choose between adjacent tiles based on the perfect Euclidean Distance of each tile 
+            //and the goal. They also avoid tiles all of them have explored (shared memory).
+            states.Add("GAME_MULTI_ORIGIN_EUCLIDEAN_INFORMED");
+
+            //The Multi Corner Perfectly Informed scenario involves four drones that start at each of the corners
+            //and choose between adjacent tiles based on the perfect Euclidean Distance of each tile 
+            //and the goal. They also avoid tiles all of them have explored (shared memory).
+            states.Add("GAME_MULTI_CORNER_PERFECTLY_INFORMED");
+
+            //The Multi Corner Decently Informed scenario involves four drones that start at each of the corners
+            //and choose between adjacent tiles based on the decent Euclidean Distance (plus or minus random noise) 
+            //of each tile and the goal. They also avoid tiles all of them have explored (shared memory).
+            states.Add("GAME_MULTI_CORNER_DECENTLY_INFORMED");
+
+            //The Multi Corner Badly Informed scenario involves four drones that start at each of the corners
+            //and choose between adjacent tiles based on the perfect Euclidean Distance of each tile
+            //and a random tile chosen at runtime. They also avoid tiles all of them have explored (shared memory).
+            states.Add("GAME_MULTI_CORNER_BADLY_INFORMED");
+            states.Add("GAME_WIN");
+
         }
 
         // Update is called once per frame
         void FixedUpdate() {
             string state = gameState.getState();
-            switch (state) {
-                case "GAME_SOLO_UNINFORMED":
-                    SoloUninformedGame();
-                    break;
-                case "GAME_MULTI_ORIGIN_UNINFORMED":
-                    MultiUninformedOriginGame();
-                    break;
-                case "GAME_MULTI_CORNER_UNINFORMED":
-                    MultiUninformedCornerGame();
-                    break;
-                case "GAME_MULTI_RANDOM_UNINFORMED":
-                    MultiUninformedRandomGame();
-                    break;
-                case "GAME_MULTI_RANDOM_QUADRANT_UNINFORMED":
-                    MultiUninformedRandomQuadrantGame();
-                    break;
-                case "GAME_MULTI_ORIGIN_MANHATTAN_INFORMED":
-                    MultiManhattanInformedOriginGame();
-                    break;
-                case "GAME_MULTI_ORIGIN_EUCLIDEAN_INFORMED":
-                    MultiEuclideanInformedOriginGame();
-                    break;
-                case "GAME_MULTI_CORNER_PERFECTLY_INFORMED":
-                    MultiPerfectlyInformedCornerGame();
-                    break;
-                case "GAME_MULTI_CORNER_DECENTLY_INFORMED":
-                    MultiDecentlyInformedCornerGame();
-                    break;
-                case "GAME_MULTI_CORNER_BADLY_INFORMED":
-                    MultiBadlyInformedCornerGame();
-                    break;
-                case "GAME_WIN":
-                    gameState.setState("GAME_OVER");
-                    break;
-            }
+            GenericGame(state);
         }
 
         //Helper function to calculate the average moves over all iterations
@@ -111,10 +129,10 @@ namespace Game {
                 drones[3] = new Drone(width, height, width - 1, height - 1);
             } else if (state.Contains("RANDOM")) {
                 if (state.Contains("QUADRANT")) {
-                    drones[0] = new Drone(width, height, Random.Range(0, width/2), Random.Range(0, height/2));
-                    drones[1] = new Drone(width, height, Random.Range(width/2, width), Random.Range(0, height/2));
-                    drones[2] = new Drone(width, height, Random.Range(0, width/2), Random.Range(height/2, height));
-                    drones[3] = new Drone(width, height, Random.Range(width/2, width), Random.Range(height/2, height));
+                    drones[0] = new Drone(width, height, Random.Range(0, width / 2), Random.Range(0, height / 2));
+                    drones[1] = new Drone(width, height, Random.Range(width / 2, width), Random.Range(0, height / 2));
+                    drones[2] = new Drone(width, height, Random.Range(0, width / 2), Random.Range(height / 2, height));
+                    drones[3] = new Drone(width, height, Random.Range(width / 2, width), Random.Range(height / 2, height));
                 } else {
                     for (int i = 0; i < drones.Count; i++) {
                         drones[i] = new Drone(width, height, Random.Range(0, width), Random.Range(0, height));
@@ -123,6 +141,7 @@ namespace Game {
             }
         }
 
+        //Solo game helper function that decides the moves of one drone
         void PlaySoloGame() {
             moveCount++;
 
@@ -141,6 +160,7 @@ namespace Game {
             }
         }
 
+        //Multi game helper function that decides the moves of four drones
         void PlayMultiGame(string state) {
             moveCount++;
 
@@ -165,124 +185,21 @@ namespace Game {
             }
         }
 
-        void PrintMoves(string subject) {
-            int averageMoves = FindAverageMoves();
-            Debug.Log(subject + " FOUND THE GOAL IN " + averageMoves + " AVERAGE MOVES!");
-        }
-
-        //The Solo Uninformed scenario involves one drone that starts at (0, 0)
-        //and chooses randomly between adjacent tiles, only avoiding those already explored.
-        void SoloUninformedGame() {
+        //Generic game helper function that deals with resetting iterations and telling which game to play
+        void GenericGame(string state) {
             if (iterations == maxIterations) {
-                PrintMoves("THE UNINFORMED DRONE AT ORIGIN");
-                ResetIteration("GAME_MULTI_ORIGIN_UNINFORMED", true);
+                if (state == "GAME_WIN")
+                    return;
+                int averageMoves = FindAverageMoves();
+                Debug.Log("THE " + state + " SCENARIO TOOK " + averageMoves + " AVERAGE MOVES!");
+                stateIndex++;
+                ResetIteration((string)states[stateIndex], true);
                 return;
             }
-            PlaySoloGame();
-        }
-
-        //The Multi Origin Uninformed scenario involves four drones that all start at (0, 0)
-        //and choose randomly between adjacent tiles, only avoiding those each has explored (no shared memory).
-        void MultiUninformedOriginGame() {
-            if (iterations == maxIterations) {
-                PrintMoves("THE UNINFORMED DRONES AT ORIGIN");
-                ResetIteration("GAME_MULTI_CORNER_UNINFORMED", true);
-                return;
-            }
-            PlayMultiGame("GAME_MULTI_ORIGIN_UNINFORMED");
-        }
-
-        //The Multi Corner Uninformed scenario involves four drones that start at each of the corners
-        //and choose randomly between adjacent tiles, only avoiding those each has explored (no shared memory).
-        void MultiUninformedCornerGame() {
-            if (iterations == maxIterations) {
-                PrintMoves("THE UNINFORMED DRONES AT CORNERS");
-                ResetIteration("GAME_MULTI_RANDOM_UNINFORMED", true);
-                return;
-            }
-            PlayMultiGame("GAME_MULTI_CORNER_UNINFORMED");
-        }
-
-        //The Multi Corner Uninformed scenario involves four drones that start at random tiles
-        //and choose randomly between adjacent tiles, only avoiding those each has explored (no shared memory).
-        void MultiUninformedRandomGame() {
-            if (iterations == maxIterations) {
-                PrintMoves("THE UNINFORMED DRONES AT RANDOM TILES");
-                ResetIteration("GAME_MULTI_RANDOM_QUADRANT_UNINFORMED", true);
-                return;
-            }
-            PlayMultiGame("GAME_MULTI_RANDOM_UNINFORMED");
-        }
-
-        //The Multi Corner Uninformed scenario involves four drones that start at random spots in each of the four quadrants
-        //and choose randomly between adjacent tiles, only avoiding those each has explored (no shared memory).
-        void MultiUninformedRandomQuadrantGame() {
-            if (iterations == maxIterations) {
-                PrintMoves("THE UNINFORMED DRONES AT RANDOM TILES IN EACH QUADRANT");
-                ResetIteration("GAME_MULTI_ORIGIN_MANHATTAN_INFORMED", true);
-                return;
-            }
-            PlayMultiGame("GAME_MULTI_RANDOM_QUADRANT_UNINFORMED");
-        }
-
-        //The Multi Origin Manhattan Informed scenario involves four drones that all start at (0, 0)
-        //and choose between adjacent tiles based on the perfect Manhattan Distance of each tile 
-        //and the goal. They also avoid tiles all of them have explored (shared memory).
-        void MultiManhattanInformedOriginGame() {
-            if (iterations == maxIterations) {
-                PrintMoves("THE PERFECTLY INFORMED MANHATTAN DRONES AT ORIGIN");
-                ResetIteration("GAME_MULTI_ORIGIN_EUCLIDEAN_INFORMED", true);
-                return;
-            }
-            PlayMultiGame("GAME_MULTI_ORIGIN_MANHATTAN_INFORMED");
-        }
-
-        //The Multi Origin Euclidean Informed scenario involves four drones that all start at (0, 0)
-        //and choose between adjacent tiles based on the perfect Euclidean Distance of each tile 
-        //and the goal. They also avoid tiles all of them have explored (shared memory).
-        void MultiEuclideanInformedOriginGame() {
-            if (iterations == maxIterations) {
-                PrintMoves("THE PERFECTLY INFORMED EUCLIDEAN DRONES AT ORIGIN");
-                ResetIteration("GAME_MULTI_CORNER_PERFECTLY_INFORMED", true);
-                return;
-            }
-            PlayMultiGame("GAME_MULTI_ORIGIN_EUCLIDEAN_INFORMED");
-        }
-
-        //The Multi Corner Perfectly Informed scenario involves four drones that start at each of the corners
-        //and choose between adjacent tiles based on the perfect Euclidean Distance of each tile 
-        //and the goal. They also avoid tiles all of them have explored (shared memory).
-        void MultiPerfectlyInformedCornerGame() {
-            if (iterations == maxIterations) {
-                PrintMoves("THE PERFECTLY INFORMED DRONES AT CORNERS");
-                ResetIteration("GAME_MULTI_CORNER_DECENTLY_INFORMED", true);
-                return;
-            }
-            PlayMultiGame("GAME_MULTI_CORNER_PERFECTLY_INFORMED");
-        }
-
-        //The Multi Corner Decently Informed scenario involves four drones that start at each of the corners
-        //and choose between adjacent tiles based on the decent Euclidean Distance (plus or minus random noise) 
-        //of each tile and the goal. They also avoid tiles all of them have explored (shared memory).
-        void MultiDecentlyInformedCornerGame() {
-            if (iterations == maxIterations) {
-                PrintMoves("THE DECENTLY INFORMED DRONES AT CORNERS");
-                ResetIteration("GAME_MULTI_CORNER_BADLY_INFORMED", true);
-                return;
-            }
-            PlayMultiGame("GAME_MULTI_CORNER_DECENTLY_INFORMED");
-        }
-
-        //The Multi Corner Badly Informed scenario involves four drones that start at each of the corners
-        //and choose between adjacent tiles based on the perfect Euclidean Distance of each tile
-        //and a random tile chosen at runtime. They also avoid tiles all of them have explored (shared memory).
-        void MultiBadlyInformedCornerGame() {
-            if (iterations == maxIterations) {
-                PrintMoves("THE BADLY INFORMED DRONES AT CORNERS");
-                gameState.setState("GAME_WIN"); 
-                return;
-            }
-            PlayMultiGame("GAME_MULTI_CORNER_BADLY_INFORMED");
+            if (state.Contains("SOLO"))
+                PlaySoloGame();
+            else
+                PlayMultiGame(state);
         }
     }
 }
