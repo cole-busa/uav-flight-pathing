@@ -121,7 +121,36 @@ namespace Game {
                     }
                 }
             }
-            
+        }
+
+        void PlaySoloGame(int[,] map, bool[,] explored, float[,] heuristics) {
+            ArrayList adjacent = drone.adjacent(map);
+            (int x, int y) decision = (0, 0);
+            decision = drone.findMove(map, explored, heuristics, adjacent);
+            drone.move(decision);
+            explored[decision.y, decision.x] = true;
+
+            if (map[decision.y, decision.x] == 1) {
+                ResetIteration("GAME_SOLO_UNINFORMED", false);
+            }
+        }
+
+        void PlayMultiGame(int[,] map, bool[,] explored, float[,] heuristics, bool informed, string state) {
+            foreach (Drone d in drones) {
+                if (!informed)
+                    explored = d.getExplored();
+
+                ArrayList adjacent = d.adjacent(map);
+                (int x, int y) decision = (0, 0);
+                decision = d.findMove(map, explored, heuristics, adjacent);
+                d.move(decision);
+                explored[decision.y, decision.x] = true;
+
+                if (map[decision.y, decision.x] == 1) {
+                    ResetIteration(state, false);
+                    return;
+                }
+            }
         }
 
         //The Solo Uninformed scenario involves one drone that starts at (0, 0)
@@ -131,20 +160,14 @@ namespace Game {
                 int averageMoves = findAverageMoves();
                 Debug.Log("THE UNINFORMED DRONE AT ORIGIN FOUND THE GOAL IN " + averageMoves + " AVERAGE MOVES!");
                 ResetIteration("GAME_MULTI_ORIGIN_UNINFORMED", true);
-            } else {
-                int[,] map = gameState.getMap();
-                bool[,] explored = gameState.getGlobalExplored();
-                float[,] heuristics = gameState.getHeuristics();
-                ArrayList adjacent = drone.adjacent(map);
-                (int x, int y) decision = (0, 0);
-                decision = drone.findMove(map, explored, heuristics, adjacent);
-                drone.move(decision);
-                explored[decision.y, decision.x] = true;
-                moveCount++;
-                if (map[decision.y, decision.x] == 1) {
-                    ResetIteration("GAME_SOLO_UNINFORMED", false);
-                }
+                return;
             }
+            moveCount++;
+
+            int[,] map = gameState.getMap();
+            bool[,] explored = gameState.getGlobalExplored();
+            float[,] heuristics = gameState.getHeuristics();
+            PlaySoloGame(map, explored, heuristics);
         }
 
         //The Multi Origin Uninformed scenario involves four drones that all start at (0, 0)
@@ -154,23 +177,14 @@ namespace Game {
                 int averageMoves = findAverageMoves();
                 Debug.Log("THE UNINFORMED DRONES AT ORIGIN FOUND THE GOAL IN " + averageMoves + " AVERAGE MOVES!");
                 ResetIteration("GAME_MULTI_CORNER_UNINFORMED", true);
-            } else {
-                int[,] map = gameState.getMap();
-                float[,] heuristics = gameState.getHeuristics();
-                moveCount++;
-                foreach (Drone d in drones) {
-                    bool[,] explored = d.getExplored();
-                    ArrayList adjacent = d.adjacent(map);
-                    (int x, int y) decision = (0, 0);
-                    decision = d.findMove(map, explored, heuristics, adjacent);
-                    d.move(decision);
-                    explored[decision.y, decision.x] = true;
-                    if (map[decision.y, decision.x] == 1) {
-                        ResetIteration("GAME_MULTI_ORIGIN_UNINFORMED", false);
-                        break;
-                    }
-                }
+                return;
             }
+            moveCount++;
+
+            int[,] map = gameState.getMap();
+            bool[,] explored = gameState.getGlobalExplored();
+            float[,] heuristics = gameState.getHeuristics();
+            PlayMultiGame(map, explored, heuristics, false, "GAME_MULTI_ORIGIN_UNINFORMED");
         }
 
         //The Multi Corner Uninformed scenario involves four drones that start at each of the corners
@@ -180,23 +194,14 @@ namespace Game {
                 int averageMoves = findAverageMoves();
                 Debug.Log("THE UNINFORMED DRONES AT CORNERS FOUND THE GOAL IN " + averageMoves + " AVERAGE MOVES!");
                 ResetIteration("GAME_MULTI_RANDOM_UNINFORMED", true);
-            } else {
-                int[,] map = gameState.getMap();
-                float[,] heuristics = gameState.getHeuristics();
-                moveCount++;
-                foreach (Drone d in drones) {
-                    bool[,] explored = d.getExplored();
-                    ArrayList adjacent = d.adjacent(map);
-                    (int x, int y) decision = (0, 0);
-                    decision = d.findMove(map, explored, heuristics, adjacent);
-                    d.move(decision);
-                    explored[decision.y, decision.x] = true;
-                    if (map[decision.y, decision.x] == 1) {
-                        ResetIteration("GAME_MULTI_CORNER_UNINFORMED", false);
-                        break;
-                    }
-                }
+                return;
             }
+            moveCount++;
+
+            int[,] map = gameState.getMap();
+            bool[,] explored = gameState.getGlobalExplored();
+            float[,] heuristics = gameState.getHeuristics();
+            PlayMultiGame(map, explored, heuristics, false, "GAME_MULTI_CORNER_UNINFORMED");
         }
 
         //The Multi Corner Uninformed scenario involves four drones that start at random tiles
@@ -206,23 +211,14 @@ namespace Game {
                 int averageMoves = findAverageMoves();
                 Debug.Log("THE UNINFORMED DRONES AT RANDOM TILES FOUND THE GOAL IN " + averageMoves + " AVERAGE MOVES!");
                 ResetIteration("GAME_MULTI_RANDOM_QUADRANT_UNINFORMED", true);
-            } else {
-                int[,] map = gameState.getMap();
-                float[,] heuristics = gameState.getHeuristics();
-                moveCount++;
-                foreach (Drone d in drones) {
-                    bool[,] explored = d.getExplored();
-                    ArrayList adjacent = d.adjacent(map);
-                    (int x, int y) decision = (0, 0);
-                    decision = d.findMove(map, explored, heuristics, adjacent);
-                    d.move(decision);
-                    explored[decision.y, decision.x] = true;
-                    if (map[decision.y, decision.x] == 1) {
-                        ResetIteration("GAME_MULTI_RANDOM_UNINFORMED", false);
-                        break;
-                    }
-                }
+                return;
             }
+            moveCount++;
+
+            int[,] map = gameState.getMap();
+            bool[,] explored = gameState.getGlobalExplored();
+            float[,] heuristics = gameState.getHeuristics();
+            PlayMultiGame(map, explored, heuristics, false, "GAME_MULTI_RANDOM_UNINFORMED");
         }
 
         //The Multi Corner Uninformed scenario involves four drones that start at random spots in each of the four quadrants
@@ -232,23 +228,14 @@ namespace Game {
                 int averageMoves = findAverageMoves();
                 Debug.Log("THE UNINFORMED DRONES AT RANDOM TILES IN EACH QUADRANT FOUND THE GOAL IN " + averageMoves + " AVERAGE MOVES!");
                 ResetIteration("GAME_MULTI_ORIGIN_MANHATTAN_INFORMED", true);
-            } else {
-                int[,] map = gameState.getMap();
-                float[,] heuristics = gameState.getHeuristics();
-                moveCount++;
-                foreach (Drone d in drones) {
-                    bool[,] explored = d.getExplored();
-                    ArrayList adjacent = d.adjacent(map);
-                    (int x, int y) decision = (0, 0);
-                    decision = d.findMove(map, explored, heuristics, adjacent);
-                    d.move(decision);
-                    explored[decision.y, decision.x] = true;
-                    if (map[decision.y, decision.x] == 1) {
-                        ResetIteration("GAME_MULTI_RANDOM_QUADRANT_UNINFORMED", false);
-                        break;
-                    }
-                }
+                return;
             }
+            moveCount++;
+
+            int[,] map = gameState.getMap();
+            bool[,] explored = gameState.getGlobalExplored();
+            float[,] heuristics = gameState.getHeuristics();
+            PlayMultiGame(map, explored, heuristics, false, "GAME_MULTI_RANDOM_QUADRANT_UNINFORMED");
         }
 
         //The Multi Origin Manhattan Informed scenario involves four drones that all start at (0, 0)
@@ -259,23 +246,14 @@ namespace Game {
                 int averageMoves = findAverageMoves();
                 Debug.Log("THE PERFECTLY INFORMED MANHATTAN DRONES AT ORIGIN FOUND THE GOAL IN " + averageMoves + " AVERAGE MOVES!");
                 ResetIteration("GAME_MULTI_ORIGIN_EUCLIDEAN_INFORMED", true);
-            } else {
-                int[,] map = gameState.getMap();
-                bool[,] explored = gameState.getGlobalExplored();
-                float[,] heuristics = gameState.getHeuristics();
-                moveCount++;
-                foreach (Drone d in drones) {
-                    ArrayList adjacent = d.adjacent(map);
-                    (int x, int y) decision = (0, 0);
-                    decision = d.findMove(map, explored, heuristics, adjacent);
-                    d.move(decision);
-                    explored[decision.y, decision.x] = true;
-                    if (map[decision.y, decision.x] == 1) {
-                        ResetIteration("GAME_MULTI_ORIGIN_MANHATTAN_INFORMED", false);
-                        break;
-                    }
-                }
+                return;
             }
+            moveCount++;
+
+            int[,] map = gameState.getMap();
+            bool[,] explored = gameState.getGlobalExplored();
+            float[,] heuristics = gameState.getHeuristics();
+            PlayMultiGame(map, explored, heuristics, true, "GAME_MULTI_ORIGIN_MANHATTAN_INFORMED");
         }
 
         //The Multi Origin Euclidean Informed scenario involves four drones that all start at (0, 0)
@@ -286,23 +264,14 @@ namespace Game {
                 int averageMoves = findAverageMoves();
                 Debug.Log("THE PERFECTLY INFORMED EUCLIDEAN DRONES AT ORIGIN FOUND THE GOAL IN " + averageMoves + " AVERAGE MOVES!");
                 ResetIteration("GAME_MULTI_CORNER_PERFECTLY_INFORMED", true);
-            } else {
-                int[,] map = gameState.getMap();
-                bool[,] explored = gameState.getGlobalExplored();
-                float[,] heuristics = gameState.getHeuristics();
-                moveCount++;
-                foreach (Drone d in drones) {
-                    ArrayList adjacent = d.adjacent(map);
-                    (int x, int y) decision = (0, 0);
-                    decision = d.findMove(map, explored, heuristics, adjacent);
-                    d.move(decision);
-                    explored[decision.y, decision.x] = true;
-                    if (map[decision.y, decision.x] == 1) {
-                        ResetIteration("GAME_MULTI_ORIGIN_EUCLIDEAN_INFORMED", false);
-                        break;
-                    }
-                }
+                return;
             }
+            moveCount++;
+
+            int[,] map = gameState.getMap();
+            bool[,] explored = gameState.getGlobalExplored();
+            float[,] heuristics = gameState.getHeuristics();
+            PlayMultiGame(map, explored, heuristics, true, "GAME_MULTI_ORIGIN_EUCLIDEAN_INFORMED");
         }
 
         //The Multi Corner Perfectly Informed scenario involves four drones that start at each of the corners
@@ -313,23 +282,14 @@ namespace Game {
                 int averageMoves = findAverageMoves();
                 Debug.Log("THE PERFECTLY INFORMED DRONES AT CORNERS FOUND THE GOAL IN " + averageMoves + " AVERAGE MOVES!");
                 ResetIteration("GAME_MULTI_CORNER_DECENTLY_INFORMED", true);
-            } else {
-                int[,] map = gameState.getMap();
-                bool[,] explored = gameState.getGlobalExplored();
-                float[,] heuristics = gameState.getHeuristics();
-                moveCount++;
-                foreach (Drone d in drones) {
-                    ArrayList adjacent = d.adjacent(map);
-                    (int x, int y) decision = (0, 0);
-                    decision = d.findMove(map, explored, heuristics, adjacent);
-                    d.move(decision);
-                    explored[decision.y, decision.x] = true;
-                    if (map[decision.y, decision.x] == 1) {
-                        ResetIteration("GAME_MULTI_CORNER_PERFECTLY_INFORMED", false);
-                        break;
-                    }
-                }
+                return;
             }
+            moveCount++;
+
+            int[,] map = gameState.getMap();
+            bool[,] explored = gameState.getGlobalExplored();
+            float[,] heuristics = gameState.getHeuristics();
+            PlayMultiGame(map, explored, heuristics, true, "GAME_MULTI_CORNER_PERFECTLY_INFORMED");
         }
 
         //The Multi Corner Decently Informed scenario involves four drones that start at each of the corners
@@ -340,23 +300,14 @@ namespace Game {
                 int averageMoves = findAverageMoves();
                 Debug.Log("THE DECENTLY INFORMED DRONES AT CORNERS FOUND THE GOAL IN " + averageMoves + " AVERAGE MOVES!");
                 ResetIteration("GAME_MULTI_CORNER_BADLY_INFORMED", true);
-            } else {
-                int[,] map = gameState.getMap();
-                bool[,] explored = gameState.getGlobalExplored();
-                float[,] heuristics = gameState.getHeuristics();
-                moveCount++;
-                foreach (Drone d in drones) {
-                    ArrayList adjacent = d.adjacent(map);
-                    (int x, int y) decision = (0, 0);
-                    decision = d.findMove(map, explored, heuristics, adjacent);
-                    d.move(decision);
-                    explored[decision.y, decision.x] = true;
-                    if (map[decision.y, decision.x] == 1) {
-                        ResetIteration("GAME_MULTI_CORNER_DECENTLY_INFORMED", false);
-                        break;
-                    }
-                }
+                return;
             }
+            moveCount++;
+
+            int[,] map = gameState.getMap();
+            bool[,] explored = gameState.getGlobalExplored();
+            float[,] heuristics = gameState.getHeuristics();
+            PlayMultiGame(map, explored, heuristics, true, "GAME_MULTI_CORNER_DECENTLY_INFORMED");
         }
 
         //The Multi Corner Badly Informed scenario involves four drones that start at each of the corners
@@ -366,24 +317,15 @@ namespace Game {
             if (iterations == maxIterations) {
                 int averageMoves = findAverageMoves();
                 Debug.Log("THE BADLY INFORMED DRONES AT CORNERS FOUND THE GOAL IN " + averageMoves + " AVERAGE MOVES!");
-                gameState.setState("GAME_WIN");
-            } else {
-                int[,] map = gameState.getMap();
-                bool[,] explored = gameState.getGlobalExplored();
-                float[,] heuristics = gameState.getHeuristics();
-                moveCount++;
-                foreach (Drone d in drones) {
-                    ArrayList adjacent = d.adjacent(map);
-                    (int x, int y) decision = (0, 0);
-                    decision = d.findMove(map, explored, heuristics, adjacent);
-                    d.move(decision);
-                    explored[decision.y, decision.x] = true;
-                    if (map[decision.y, decision.x] == 1) {
-                        ResetIteration("GAME_MULTI_CORNER_BADLY_INFORMED", false);
-                        break;
-                    }
-                }
+                gameState.setState("GAME_WIN"); 
+                return;
             }
+            moveCount++;
+
+            int[,] map = gameState.getMap();
+            bool[,] explored = gameState.getGlobalExplored();
+            float[,] heuristics = gameState.getHeuristics();
+            PlayMultiGame(map, explored, heuristics, true, "GAME_MULTI_CORNER_BADLY_INFORMED");
         }
     }
 }
