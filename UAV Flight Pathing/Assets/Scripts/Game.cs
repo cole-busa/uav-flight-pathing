@@ -42,34 +42,34 @@ namespace Game {
             string state = gameState.getState();
             switch (state) {
                 case "GAME_SOLO_UNINFORMED":
-                    soloUninformedGame();
+                    SoloUninformedGame();
                     break;
                 case "GAME_MULTI_ORIGIN_UNINFORMED":
-                    multiUninformedOriginGame();
+                    MultiUninformedOriginGame();
                     break;
                 case "GAME_MULTI_CORNER_UNINFORMED":
-                    multiUninformedCornerGame();
+                    MultiUninformedCornerGame();
                     break;
                 case "GAME_MULTI_RANDOM_UNINFORMED":
-                    multiUninformedRandomGame();
+                    MultiUninformedRandomGame();
                     break;
                 case "GAME_MULTI_RANDOM_QUADRANT_UNINFORMED":
-                    multiUninformedRandomQuadrantGame();
+                    MultiUninformedRandomQuadrantGame();
                     break;
                 case "GAME_MULTI_ORIGIN_MANHATTAN_INFORMED":
-                    multiManhattanInformedOriginGame();
+                    MultiManhattanInformedOriginGame();
                     break;
                 case "GAME_MULTI_ORIGIN_EUCLIDEAN_INFORMED":
-                    multiEuclideanInformedOriginGame();
+                    MultiEuclideanInformedOriginGame();
                     break;
                 case "GAME_MULTI_CORNER_PERFECTLY_INFORMED":
-                    multiPerfectlyInformedCornerGame();
+                    MultiPerfectlyInformedCornerGame();
                     break;
                 case "GAME_MULTI_CORNER_DECENTLY_INFORMED":
-                    multiDecentlyInformedCornerGame();
+                    MultiDecentlyInformedCornerGame();
                     break;
                 case "GAME_MULTI_CORNER_BADLY_INFORMED":
-                    multiBadlyInformedCornerGame();
+                    MultiBadlyInformedCornerGame();
                     break;
                 case "GAME_WIN":
                     gameState.setState("GAME_OVER");
@@ -78,7 +78,7 @@ namespace Game {
         }
 
         //Helper function to calculate the average moves over all iterations
-        int findAverageMoves() {
+        int FindAverageMoves() {
             int sum = 0;
             foreach (int i in movesPerIteration) {
                 sum += i;
@@ -123,7 +123,13 @@ namespace Game {
             }
         }
 
-        void PlaySoloGame(int[,] map, bool[,] explored, float[,] heuristics) {
+        void PlaySoloGame() {
+            moveCount++;
+
+            int[,] map = gameState.getMap();
+            bool[,] explored = gameState.getGlobalExplored();
+            float[,] heuristics = gameState.getHeuristics();
+
             ArrayList adjacent = drone.adjacent(map);
             (int x, int y) decision = (0, 0);
             decision = drone.findMove(map, explored, heuristics, adjacent);
@@ -135,9 +141,15 @@ namespace Game {
             }
         }
 
-        void PlayMultiGame(int[,] map, bool[,] explored, float[,] heuristics, bool informed, string state) {
+        void PlayMultiGame(string state) {
+            moveCount++;
+
+            int[,] map = gameState.getMap();
+            bool[,] explored = gameState.getGlobalExplored();
+            float[,] heuristics = gameState.getHeuristics();
+
             foreach (Drone d in drones) {
-                if (!informed)
+                if (state.Contains("UNINFORMED"))
                     explored = d.getExplored();
 
                 ArrayList adjacent = d.adjacent(map);
@@ -153,179 +165,124 @@ namespace Game {
             }
         }
 
+        void PrintMoves(string subject) {
+            int averageMoves = FindAverageMoves();
+            Debug.Log(subject + " FOUND THE GOAL IN " + averageMoves + " AVERAGE MOVES!");
+        }
+
         //The Solo Uninformed scenario involves one drone that starts at (0, 0)
         //and chooses randomly between adjacent tiles, only avoiding those already explored.
-        void soloUninformedGame() {
+        void SoloUninformedGame() {
             if (iterations == maxIterations) {
-                int averageMoves = findAverageMoves();
-                Debug.Log("THE UNINFORMED DRONE AT ORIGIN FOUND THE GOAL IN " + averageMoves + " AVERAGE MOVES!");
+                PrintMoves("THE UNINFORMED DRONE AT ORIGIN");
                 ResetIteration("GAME_MULTI_ORIGIN_UNINFORMED", true);
                 return;
             }
-            moveCount++;
-
-            int[,] map = gameState.getMap();
-            bool[,] explored = gameState.getGlobalExplored();
-            float[,] heuristics = gameState.getHeuristics();
-            PlaySoloGame(map, explored, heuristics);
+            PlaySoloGame();
         }
 
         //The Multi Origin Uninformed scenario involves four drones that all start at (0, 0)
         //and choose randomly between adjacent tiles, only avoiding those each has explored (no shared memory).
-        void multiUninformedOriginGame() {
+        void MultiUninformedOriginGame() {
             if (iterations == maxIterations) {
-                int averageMoves = findAverageMoves();
-                Debug.Log("THE UNINFORMED DRONES AT ORIGIN FOUND THE GOAL IN " + averageMoves + " AVERAGE MOVES!");
+                PrintMoves("THE UNINFORMED DRONES AT ORIGIN");
                 ResetIteration("GAME_MULTI_CORNER_UNINFORMED", true);
                 return;
             }
-            moveCount++;
-
-            int[,] map = gameState.getMap();
-            bool[,] explored = gameState.getGlobalExplored();
-            float[,] heuristics = gameState.getHeuristics();
-            PlayMultiGame(map, explored, heuristics, false, "GAME_MULTI_ORIGIN_UNINFORMED");
+            PlayMultiGame("GAME_MULTI_ORIGIN_UNINFORMED");
         }
 
         //The Multi Corner Uninformed scenario involves four drones that start at each of the corners
         //and choose randomly between adjacent tiles, only avoiding those each has explored (no shared memory).
-        void multiUninformedCornerGame() {
+        void MultiUninformedCornerGame() {
             if (iterations == maxIterations) {
-                int averageMoves = findAverageMoves();
-                Debug.Log("THE UNINFORMED DRONES AT CORNERS FOUND THE GOAL IN " + averageMoves + " AVERAGE MOVES!");
+                PrintMoves("THE UNINFORMED DRONES AT CORNERS");
                 ResetIteration("GAME_MULTI_RANDOM_UNINFORMED", true);
                 return;
             }
-            moveCount++;
-
-            int[,] map = gameState.getMap();
-            bool[,] explored = gameState.getGlobalExplored();
-            float[,] heuristics = gameState.getHeuristics();
-            PlayMultiGame(map, explored, heuristics, false, "GAME_MULTI_CORNER_UNINFORMED");
+            PlayMultiGame("GAME_MULTI_CORNER_UNINFORMED");
         }
 
         //The Multi Corner Uninformed scenario involves four drones that start at random tiles
         //and choose randomly between adjacent tiles, only avoiding those each has explored (no shared memory).
-        void multiUninformedRandomGame() {
+        void MultiUninformedRandomGame() {
             if (iterations == maxIterations) {
-                int averageMoves = findAverageMoves();
-                Debug.Log("THE UNINFORMED DRONES AT RANDOM TILES FOUND THE GOAL IN " + averageMoves + " AVERAGE MOVES!");
+                PrintMoves("THE UNINFORMED DRONES AT RANDOM TILES");
                 ResetIteration("GAME_MULTI_RANDOM_QUADRANT_UNINFORMED", true);
                 return;
             }
-            moveCount++;
-
-            int[,] map = gameState.getMap();
-            bool[,] explored = gameState.getGlobalExplored();
-            float[,] heuristics = gameState.getHeuristics();
-            PlayMultiGame(map, explored, heuristics, false, "GAME_MULTI_RANDOM_UNINFORMED");
+            PlayMultiGame("GAME_MULTI_RANDOM_UNINFORMED");
         }
 
         //The Multi Corner Uninformed scenario involves four drones that start at random spots in each of the four quadrants
         //and choose randomly between adjacent tiles, only avoiding those each has explored (no shared memory).
-        void multiUninformedRandomQuadrantGame() {
+        void MultiUninformedRandomQuadrantGame() {
             if (iterations == maxIterations) {
-                int averageMoves = findAverageMoves();
-                Debug.Log("THE UNINFORMED DRONES AT RANDOM TILES IN EACH QUADRANT FOUND THE GOAL IN " + averageMoves + " AVERAGE MOVES!");
+                PrintMoves("THE UNINFORMED DRONES AT RANDOM TILES IN EACH QUADRANT");
                 ResetIteration("GAME_MULTI_ORIGIN_MANHATTAN_INFORMED", true);
                 return;
             }
-            moveCount++;
-
-            int[,] map = gameState.getMap();
-            bool[,] explored = gameState.getGlobalExplored();
-            float[,] heuristics = gameState.getHeuristics();
-            PlayMultiGame(map, explored, heuristics, false, "GAME_MULTI_RANDOM_QUADRANT_UNINFORMED");
+            PlayMultiGame("GAME_MULTI_RANDOM_QUADRANT_UNINFORMED");
         }
 
         //The Multi Origin Manhattan Informed scenario involves four drones that all start at (0, 0)
         //and choose between adjacent tiles based on the perfect Manhattan Distance of each tile 
         //and the goal. They also avoid tiles all of them have explored (shared memory).
-        void multiManhattanInformedOriginGame() {
+        void MultiManhattanInformedOriginGame() {
             if (iterations == maxIterations) {
-                int averageMoves = findAverageMoves();
-                Debug.Log("THE PERFECTLY INFORMED MANHATTAN DRONES AT ORIGIN FOUND THE GOAL IN " + averageMoves + " AVERAGE MOVES!");
+                PrintMoves("THE PERFECTLY INFORMED MANHATTAN DRONES AT ORIGIN");
                 ResetIteration("GAME_MULTI_ORIGIN_EUCLIDEAN_INFORMED", true);
                 return;
             }
-            moveCount++;
-
-            int[,] map = gameState.getMap();
-            bool[,] explored = gameState.getGlobalExplored();
-            float[,] heuristics = gameState.getHeuristics();
-            PlayMultiGame(map, explored, heuristics, true, "GAME_MULTI_ORIGIN_MANHATTAN_INFORMED");
+            PlayMultiGame("GAME_MULTI_ORIGIN_MANHATTAN_INFORMED");
         }
 
         //The Multi Origin Euclidean Informed scenario involves four drones that all start at (0, 0)
         //and choose between adjacent tiles based on the perfect Euclidean Distance of each tile 
         //and the goal. They also avoid tiles all of them have explored (shared memory).
-        void multiEuclideanInformedOriginGame() {
+        void MultiEuclideanInformedOriginGame() {
             if (iterations == maxIterations) {
-                int averageMoves = findAverageMoves();
-                Debug.Log("THE PERFECTLY INFORMED EUCLIDEAN DRONES AT ORIGIN FOUND THE GOAL IN " + averageMoves + " AVERAGE MOVES!");
+                PrintMoves("THE PERFECTLY INFORMED EUCLIDEAN DRONES AT ORIGIN");
                 ResetIteration("GAME_MULTI_CORNER_PERFECTLY_INFORMED", true);
                 return;
             }
-            moveCount++;
-
-            int[,] map = gameState.getMap();
-            bool[,] explored = gameState.getGlobalExplored();
-            float[,] heuristics = gameState.getHeuristics();
-            PlayMultiGame(map, explored, heuristics, true, "GAME_MULTI_ORIGIN_EUCLIDEAN_INFORMED");
+            PlayMultiGame("GAME_MULTI_ORIGIN_EUCLIDEAN_INFORMED");
         }
 
         //The Multi Corner Perfectly Informed scenario involves four drones that start at each of the corners
         //and choose between adjacent tiles based on the perfect Euclidean Distance of each tile 
         //and the goal. They also avoid tiles all of them have explored (shared memory).
-        void multiPerfectlyInformedCornerGame() {
+        void MultiPerfectlyInformedCornerGame() {
             if (iterations == maxIterations) {
-                int averageMoves = findAverageMoves();
-                Debug.Log("THE PERFECTLY INFORMED DRONES AT CORNERS FOUND THE GOAL IN " + averageMoves + " AVERAGE MOVES!");
+                PrintMoves("THE PERFECTLY INFORMED DRONES AT CORNERS");
                 ResetIteration("GAME_MULTI_CORNER_DECENTLY_INFORMED", true);
                 return;
             }
-            moveCount++;
-
-            int[,] map = gameState.getMap();
-            bool[,] explored = gameState.getGlobalExplored();
-            float[,] heuristics = gameState.getHeuristics();
-            PlayMultiGame(map, explored, heuristics, true, "GAME_MULTI_CORNER_PERFECTLY_INFORMED");
+            PlayMultiGame("GAME_MULTI_CORNER_PERFECTLY_INFORMED");
         }
 
         //The Multi Corner Decently Informed scenario involves four drones that start at each of the corners
         //and choose between adjacent tiles based on the decent Euclidean Distance (plus or minus random noise) 
         //of each tile and the goal. They also avoid tiles all of them have explored (shared memory).
-        void multiDecentlyInformedCornerGame() {
+        void MultiDecentlyInformedCornerGame() {
             if (iterations == maxIterations) {
-                int averageMoves = findAverageMoves();
-                Debug.Log("THE DECENTLY INFORMED DRONES AT CORNERS FOUND THE GOAL IN " + averageMoves + " AVERAGE MOVES!");
+                PrintMoves("THE DECENTLY INFORMED DRONES AT CORNERS");
                 ResetIteration("GAME_MULTI_CORNER_BADLY_INFORMED", true);
                 return;
             }
-            moveCount++;
-
-            int[,] map = gameState.getMap();
-            bool[,] explored = gameState.getGlobalExplored();
-            float[,] heuristics = gameState.getHeuristics();
-            PlayMultiGame(map, explored, heuristics, true, "GAME_MULTI_CORNER_DECENTLY_INFORMED");
+            PlayMultiGame("GAME_MULTI_CORNER_DECENTLY_INFORMED");
         }
 
         //The Multi Corner Badly Informed scenario involves four drones that start at each of the corners
         //and choose between adjacent tiles based on the perfect Euclidean Distance of each tile
         //and a random tile chosen at runtime. They also avoid tiles all of them have explored (shared memory).
-        void multiBadlyInformedCornerGame() {
+        void MultiBadlyInformedCornerGame() {
             if (iterations == maxIterations) {
-                int averageMoves = findAverageMoves();
-                Debug.Log("THE BADLY INFORMED DRONES AT CORNERS FOUND THE GOAL IN " + averageMoves + " AVERAGE MOVES!");
+                PrintMoves("THE BADLY INFORMED DRONES AT CORNERS");
                 gameState.setState("GAME_WIN"); 
                 return;
             }
-            moveCount++;
-
-            int[,] map = gameState.getMap();
-            bool[,] explored = gameState.getGlobalExplored();
-            float[,] heuristics = gameState.getHeuristics();
-            PlayMultiGame(map, explored, heuristics, true, "GAME_MULTI_CORNER_BADLY_INFORMED");
+            PlayMultiGame("GAME_MULTI_CORNER_BADLY_INFORMED");
         }
     }
 }
