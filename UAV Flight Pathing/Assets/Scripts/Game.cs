@@ -41,6 +41,12 @@ namespace Game {
             stateIndex = 0;
             states = new ArrayList();
 
+            Transform[] linkedObjects = new Transform[4];
+            linkedObjects[0] = GameObject.Find("drone 1").transform;
+            linkedObjects[1] = GameObject.Find("drone 2").transform;
+            linkedObjects[2] = GameObject.Find("drone 3").transform;
+            linkedObjects[3] = GameObject.Find("drone 4").transform;
+
             //The Solo Uninformed scenario involves one drone that starts at (0, 0)
             //and chooses randomly between adjacent tiles, only avoiding those already explored.
             states.Add("GAME_SOLO_UNINFORMED");
@@ -86,7 +92,6 @@ namespace Game {
             //and a random tile chosen at runtime. They also avoid tiles all of them have explored (shared memory).
             states.Add("GAME_MULTI_CORNER_BADLY_INFORMED");
             states.Add("GAME_WIN");
-
         }
 
         // Update is called once per frame
@@ -183,6 +188,14 @@ namespace Game {
                     return;
                 }
             }
+        }
+
+        void RenderSoloGame() {
+
+        }
+
+        void RenderMultiGame() {
+
         }
 
         //Generic game helper function that deals with resetting iterations and telling which game to play
