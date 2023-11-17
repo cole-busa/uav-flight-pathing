@@ -16,6 +16,7 @@ namespace Game {
         private int stateIndex;
         private int width;
         private int height;
+        private Transform[] linkedObjects;
 
 
         // Start is called before the first frame update
@@ -41,7 +42,7 @@ namespace Game {
             stateIndex = 0;
             states = new ArrayList();
 
-            Transform[] linkedObjects = new Transform[4];
+            linkedObjects = new Transform[4];
             linkedObjects[0] = GameObject.Find("drone 1").transform;
             linkedObjects[1] = GameObject.Find("drone 2").transform;
             linkedObjects[2] = GameObject.Find("drone 3").transform;
@@ -98,6 +99,10 @@ namespace Game {
         void FixedUpdate() {
             string state = gameState.getState();
             GenericGame(state);
+        }
+
+        void Update() {
+            linkedObjects[0].position = Vector3.MoveTowards(linkedObjects[0].position, new Vector3(1f, 2f, 0f), 1f * Time.deltaTime);
         }
 
         //Helper function to calculate the average moves over all iterations
