@@ -102,7 +102,17 @@ namespace Game {
         }
 
         void Update() {
-            linkedObjects[0].position = Vector3.MoveTowards(linkedObjects[0].position, new Vector3(1f, 2f, 0f), 1f * Time.deltaTime);
+            //Top left corner
+            linkedObjects[0].position = Vector3.MoveTowards(linkedObjects[0].position, new Vector3(-9.5f, 3.8f, 0f), 1f * Time.deltaTime);
+
+            //Top right corner
+            linkedObjects[1].position = Vector3.MoveTowards(linkedObjects[1].position, new Vector3(9.5f, 3.8f, 0f), 1f * Time.deltaTime);
+
+            //Bottom left corner
+            linkedObjects[2].position = Vector3.MoveTowards(linkedObjects[2].position, new Vector3(-9.5f, -3.8f, 0f), 1f * Time.deltaTime);
+
+            //Bottom right corner
+            linkedObjects[3].position = Vector3.MoveTowards(linkedObjects[3].position, new Vector3(9.5f, -3.8f, 0f), 1f * Time.deltaTime);
         }
 
         //Helper function to calculate the average moves over all iterations
