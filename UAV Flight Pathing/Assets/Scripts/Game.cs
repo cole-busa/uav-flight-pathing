@@ -17,6 +17,17 @@ namespace Game {
         private int width;
         private int height;
         private Transform[] linkedObjects;
+        private float unitWidth;
+        private float unitHeight;
+        private bool withGraphics;
+        private bool renderingSolo;
+        private bool renderingMulti;
+        private Vector3 unrendered;
+        private Vector3 spawn;
+        private Vector3 topLeftCorner;
+        private Vector3 topRightCorner;
+        private Vector3 bottomLeftCorner;
+        private Vector3 bottomRightCorner;
 
 
         // Start is called before the first frame update
@@ -24,8 +35,11 @@ namespace Game {
             //Game settings
             width = 20;
             height = 20;
+            unitWidth = 19f / width;
+            unitHeight = 7.6f / height;
             droneCount = 4;
             maxIterations = 10;
+            withGraphics = true;
 
             //Game initialization
             gameState = new GameState(width, height, "GAME_SOLO_UNINFORMED");
@@ -38,15 +52,29 @@ namespace Game {
             movesPerIteration = new ArrayList();
             moveCount = 0;
             iterations = 0;
+            renderingSolo = false;
+            renderingMulti = false;
 
             stateIndex = 0;
             states = new ArrayList();
+
+            unrendered = new Vector3(90f, 90f, 0f);
+            spawn = new Vector3(0f, 0f, 0f);
+            topLeftCorner = new Vector3(-9.5f, 3.8f, 0f);
+            topRightCorner = new Vector3(9.5f, 3.8f, 0f);
+            bottomLeftCorner = new Vector3(-9.5f, -3.8f, 0f);
+            bottomRightCorner = new Vector3(-9.5f, -3.8f, 0f);
 
             linkedObjects = new Transform[4];
             linkedObjects[0] = GameObject.Find("drone 1").transform;
             linkedObjects[1] = GameObject.Find("drone 2").transform;
             linkedObjects[2] = GameObject.Find("drone 3").transform;
             linkedObjects[3] = GameObject.Find("drone 4").transform;
+
+            linkedObjects[1].position = unrendered;
+            linkedObjects[2].position = unrendered;
+            linkedObjects[3].position = unrendered;
+
 
             //The Solo Uninformed scenario involves one drone that starts at (0, 0)
             //and chooses randomly between adjacent tiles, only avoiding those already explored.
@@ -97,22 +125,45 @@ namespace Game {
 
         // Update is called once per frame
         void FixedUpdate() {
-            string state = gameState.getState();
-            GenericGame(state);
+            if (!renderingSolo && !renderingMulti) {
+                string state = gameState.getState();
+                GenericGame(state);
+            }
         }
 
         void Update() {
-            //Top left corner
-            linkedObjects[0].position = Vector3.MoveTowards(linkedObjects[0].position, new Vector3(-9.5f, 3.8f, 0f), 1f * Time.deltaTime);
+            if (withGraphics) {
+                if (renderingSolo) {
+                    Debug.Log((drone.getPosX(), drone.getPosY()));
+                    Vector3 pos1 = new Vector3(drone.getPosX() * unitWidth - 9.5f, drone.getPosY() * unitHeight - 3.8f, 0f);
+                    //linkedObjects[0].position = Vector3.MoveTowards(linkedObjects[0].position, pos1, 1f * Time.deltaTime);
 
-            //Top right corner
-            linkedObjects[1].position = Vector3.MoveTowards(linkedObjects[1].position, new Vector3(9.5f, 3.8f, 0f), 1f * Time.deltaTime);
+                    if (pos1 == linkedObjects[0].position) {
+                        renderingSolo = false;
+                    }
+                } else if (renderingMulti) {
+                    //Top left corner
+                    Vector3 pos1 = bottomLeftCorner;
+                    linkedObjects[0].position = Vector3.MoveTowards(linkedObjects[0].position, pos1, 1f * Time.deltaTime);
 
-            //Bottom left corner
-            linkedObjects[2].position = Vector3.MoveTowards(linkedObjects[2].position, new Vector3(-9.5f, -3.8f, 0f), 1f * Time.deltaTime);
+                    //Top right corner
+                    Vector3 pos2 = topRightCorner;
+                    linkedObjects[1].position = Vector3.MoveTowards(linkedObjects[1].position, pos2, 1f * Time.deltaTime);
 
-            //Bottom right corner
-            linkedObjects[3].position = Vector3.MoveTowards(linkedObjects[3].position, new Vector3(9.5f, -3.8f, 0f), 1f * Time.deltaTime);
+                    //Bottom left corner
+                    Vector3 pos3 = bottomLeftCorner;
+                    linkedObjects[2].position = Vector3.MoveTowards(linkedObjects[2].position, pos3, 1f * Time.deltaTime);
+
+                    //Bottom right corner
+                    Vector3 pos4 = bottomRightCorner;
+                    linkedObjects[3].position = Vector3.MoveTowards(linkedObjects[3].position, pos4, 1f * Time.deltaTime);
+
+                    if (pos1 == linkedObjects[0].position && pos2 == linkedObjects[1].position
+                        && pos3 == linkedObjects[2].position && pos4 == linkedObjects[3].position) {
+                        renderingMulti = false;
+                    }
+                }
+            }
         }
 
         //Helper function to calculate the average moves over all iterations
@@ -178,6 +229,7 @@ namespace Game {
             if (map[decision.y, decision.x] == 1) {
                 ResetIteration("GAME_SOLO_UNINFORMED", false);
             }
+            Debug.Log((drone.getPosX(), drone.getPosY()));
         }
 
         //Multi game helper function that decides the moves of four drones
