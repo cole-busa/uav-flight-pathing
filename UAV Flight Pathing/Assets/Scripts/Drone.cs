@@ -9,7 +9,6 @@ namespace Game {
         private int width;
         private int height;
         private bool[,] explored;
-        private int id;
 
         public Drone(int width, int height) {
             this.posX = 0;
@@ -18,7 +17,6 @@ namespace Game {
             this.height = height;
             this.explored = new bool[width, height];
             explored[0, 0] = true;
-            id = Random.Range(0, 9999);
         }
 
         public Drone(int width, int height, int posX, int posY) {
@@ -28,7 +26,6 @@ namespace Game {
             this.height = height;
             this.explored = new bool[width, height];
             explored[0, 0] = true;
-            id = Random.Range(0, 9999);
         }
 
         public int getPosX() {
@@ -44,7 +41,6 @@ namespace Game {
         }
 
         public void move((int x, int y) pos) {
-            Debug.Log("DRONE " + id + " WANTS TO MOVE TO " + pos);
             int distance = Mathf.Abs(posX - pos.x) + Mathf.Abs(posY - pos.y);
             if (distance >= 1 && distance <= 2) {
                 posX = pos.x;

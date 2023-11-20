@@ -133,7 +133,6 @@ GameObject:
   m_Component:
   - component: {fileID: 112600031}
   - component: {fileID: 112600030}
-  - component: {fileID: 112600029}
   m_Layer: 0
   m_Name: drone 4
   m_TagString: Untagged
@@ -141,18 +140,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &112600029
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 112600028}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 79ee7e60104825140bd09b77809e34b8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!212 &112600030
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -230,7 +217,6 @@ GameObject:
   m_Component:
   - component: {fileID: 177169676}
   - component: {fileID: 177169675}
-  - component: {fileID: 177169674}
   m_Layer: 0
   m_Name: drone 2
   m_TagString: Untagged
@@ -238,18 +224,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &177169674
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 177169673}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 79ee7e60104825140bd09b77809e34b8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!212 &177169675
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -327,7 +301,6 @@ GameObject:
   m_Component:
   - component: {fileID: 243634686}
   - component: {fileID: 243634685}
-  - component: {fileID: 243634684}
   m_Layer: 0
   m_Name: drone 1
   m_TagString: Untagged
@@ -335,18 +308,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &243634684
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 243634683}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 79ee7e60104825140bd09b77809e34b8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!212 &243634685
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -516,7 +477,6 @@ GameObject:
   m_Component:
   - component: {fileID: 926819250}
   - component: {fileID: 926819249}
-  - component: {fileID: 926819248}
   m_Layer: 0
   m_Name: drone 3
   m_TagString: Untagged
@@ -524,18 +484,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &926819248
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 926819247}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 79ee7e60104825140bd09b77809e34b8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!212 &926819249
 SpriteRenderer:
   m_ObjectHideFlags: 0

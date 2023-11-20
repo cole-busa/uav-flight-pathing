@@ -128,7 +128,7 @@ namespace Game {
             if (withGraphics) {
                 if (renderingSolo) {
                     Vector3 pos1 = new Vector3(drone.getPosX() * unitWidth - 9.5f, drone.getPosY() * unitHeight - 3.8f, 0f);
-                    linkedObjects[0].position = Vector3.MoveTowards(linkedObjects[0].position, pos1, 1f * Time.deltaTime);
+                    linkedObjects[0].position = Vector3.MoveTowards(linkedObjects[0].position, pos1, 5f * Time.deltaTime);
 
                     if (pos1 == linkedObjects[0].position) {
                         renderingSolo = false;
