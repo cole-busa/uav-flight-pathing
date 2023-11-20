@@ -33,12 +33,12 @@ namespace Game {
         // Start is called before the first frame update
         void Start() {
             //Game settings
-            width = 20;
-            height = 20;
+            width = 10;
+            height = 10;
             unitWidth = 19f / width;
             unitHeight = 7.6f / height;
             droneCount = 4;
-            maxIterations = 10;
+            maxIterations = 1;
             withGraphics = true;
 
             //Game initialization
@@ -128,27 +128,34 @@ namespace Game {
             if (withGraphics) {
                 if (renderingSolo) {
                     Vector3 pos1 = new Vector3(drone.getPosX() * unitWidth - 9.5f, drone.getPosY() * unitHeight - 3.8f, 0f);
-                    linkedObjects[0].position = Vector3.MoveTowards(linkedObjects[0].position, pos1, 5f * Time.deltaTime);
+                    linkedObjects[0].position = Vector3.MoveTowards(linkedObjects[0].position, pos1, 10f * Time.deltaTime);
 
                     if (pos1 == linkedObjects[0].position) {
+                        if (iterations == maxIterations) {
+                            renderingMulti = true;
+                            linkedObjects[1].position = spawn;
+                            linkedObjects[2].position = spawn;
+                            linkedObjects[3].position = spawn;
+                        }
                         renderingSolo = false;
                     }
-                } else if (renderingMulti) {
-                    //Top left corner
-                    Vector3 pos1 = bottomLeftCorner;
-                    linkedObjects[0].position = Vector3.MoveTowards(linkedObjects[0].position, pos1, 1f * Time.deltaTime);
+                } 
+                if (renderingMulti) {
+                    //Drone 1
+                    Vector3 pos1 = new Vector3(((Drone) drones[0]).getPosX() * unitWidth - 9.5f, ((Drone) drones[0]).getPosY() * unitHeight - 3.8f, 0f);
+                    linkedObjects[0].position = Vector3.MoveTowards(linkedObjects[0].position, pos1, 10f * Time.deltaTime);
 
-                    //Top right corner
-                    Vector3 pos2 = topRightCorner;
-                    linkedObjects[1].position = Vector3.MoveTowards(linkedObjects[1].position, pos2, 1f * Time.deltaTime);
+                    //Drone 2
+                    Vector3 pos2 = new Vector3(((Drone)drones[1]).getPosX() * unitWidth - 9.5f, ((Drone)drones[1]).getPosY() * unitHeight - 3.8f, 0f);
+                    linkedObjects[1].position = Vector3.MoveTowards(linkedObjects[1].position, pos2, 10f * Time.deltaTime);
 
-                    //Bottom left corner
-                    Vector3 pos3 = bottomLeftCorner;
-                    linkedObjects[2].position = Vector3.MoveTowards(linkedObjects[2].position, pos3, 1f * Time.deltaTime);
+                    //Drone 3
+                    Vector3 pos3 = new Vector3(((Drone)drones[2]).getPosX() * unitWidth - 9.5f, ((Drone)drones[2]).getPosY() * unitHeight - 3.8f, 0f);
+                    linkedObjects[2].position = Vector3.MoveTowards(linkedObjects[2].position, pos3, 10f * Time.deltaTime);
 
-                    //Bottom right corner
-                    Vector3 pos4 = bottomRightCorner;
-                    linkedObjects[3].position = Vector3.MoveTowards(linkedObjects[3].position, pos4, 1f * Time.deltaTime);
+                    //Drone 4
+                    Vector3 pos4 = new Vector3(((Drone)drones[3]).getPosX() * unitWidth - 9.5f, ((Drone)drones[3]).getPosY() * unitHeight - 3.8f, 0f);
+                    linkedObjects[3].position = Vector3.MoveTowards(linkedObjects[3].position, pos4, 10f * Time.deltaTime);
 
                     if (pos1 == linkedObjects[0].position && pos2 == linkedObjects[1].position
                         && pos3 == linkedObjects[2].position && pos4 == linkedObjects[3].position) {
@@ -251,6 +258,7 @@ namespace Game {
                     return;
                 }
             }
+            renderingMulti = true;
         }
 
         void RenderSoloGame() {
