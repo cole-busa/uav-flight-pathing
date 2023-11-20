@@ -52,7 +52,7 @@ namespace Game {
             movesPerIteration = new ArrayList();
             moveCount = 0;
             iterations = 0;
-            renderingSolo = false;
+            renderingSolo = true;
             renderingMulti = false;
 
             stateIndex = 0;
@@ -125,18 +125,10 @@ namespace Game {
 
         // Update is called once per frame
         void FixedUpdate() {
-            if (!renderingSolo && !renderingMulti) {
-                string state = gameState.getState();
-                GenericGame(state);
-            }
-        }
-
-        void Update() {
             if (withGraphics) {
                 if (renderingSolo) {
-                    Debug.Log((drone.getPosX(), drone.getPosY()));
                     Vector3 pos1 = new Vector3(drone.getPosX() * unitWidth - 9.5f, drone.getPosY() * unitHeight - 3.8f, 0f);
-                    //linkedObjects[0].position = Vector3.MoveTowards(linkedObjects[0].position, pos1, 1f * Time.deltaTime);
+                    linkedObjects[0].position = Vector3.MoveTowards(linkedObjects[0].position, pos1, 1f * Time.deltaTime);
 
                     if (pos1 == linkedObjects[0].position) {
                         renderingSolo = false;
@@ -163,6 +155,10 @@ namespace Game {
                         renderingMulti = false;
                     }
                 }
+            }
+            if (!renderingSolo && !renderingMulti) {
+                string state = gameState.getState();
+                GenericGame(state);
             }
         }
 
@@ -229,7 +225,7 @@ namespace Game {
             if (map[decision.y, decision.x] == 1) {
                 ResetIteration("GAME_SOLO_UNINFORMED", false);
             }
-            Debug.Log((drone.getPosX(), drone.getPosY()));
+            renderingSolo = true;
         }
 
         //Multi game helper function that decides the moves of four drones
