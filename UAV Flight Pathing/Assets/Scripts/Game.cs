@@ -20,6 +20,7 @@ namespace Game {
         private Transform goal;
         private float unitWidth;
         private float unitHeight;
+        private float moveSpeed;
         private bool withGraphics;
         private bool renderingSolo;
         private bool renderingMulti;
@@ -39,8 +40,9 @@ namespace Game {
             unitWidth = 19f / width;
             unitHeight = 7.6f / height;
             droneCount = 4;
-            maxIterations = 2;
+            maxIterations = 1;
             withGraphics = true;
+            moveSpeed = 5f;
 
             //Game initialization
             gameState = new GameState(width, height, "GAME_SOLO_UNINFORMED");
@@ -64,7 +66,7 @@ namespace Game {
             topLeftCorner = new Vector3(-9.5f, 3.8f, 0f);
             topRightCorner = new Vector3(9.5f, 3.8f, 0f);
             bottomLeftCorner = new Vector3(-9.5f, -3.8f, 0f);
-            bottomRightCorner = new Vector3(-9.5f, -3.8f, 0f);
+            bottomRightCorner = new Vector3(9.5f, -3.8f, 0f);
 
             goal = GameObject.Find("person").transform;
             goal.position = new Vector3(gameState.getGoal().x * unitWidth - 9.5f, gameState.getGoal().y * unitHeight - 3.8f, 0f);
@@ -132,7 +134,7 @@ namespace Game {
             if (withGraphics) {
                 if (renderingSolo) {
                     Vector3 pos1 = new Vector3(drone.getPosX() * unitWidth - 9.5f, drone.getPosY() * unitHeight - 3.8f, 0f);
-                    linkedObjects[0].position = Vector3.MoveTowards(linkedObjects[0].position, pos1, 10f * Time.deltaTime);
+                    linkedObjects[0].position = Vector3.MoveTowards(linkedObjects[0].position, pos1, moveSpeed * Time.deltaTime);
 
                     if (pos1 == linkedObjects[0].position) {
                         if (iterations == maxIterations) {
@@ -149,19 +151,19 @@ namespace Game {
                 if (renderingMulti) {
                     //Drone 1
                     Vector3 pos1 = new Vector3(((Drone) drones[0]).getPosX() * unitWidth - 9.5f, ((Drone) drones[0]).getPosY() * unitHeight - 3.8f, 0f);
-                    linkedObjects[0].position = Vector3.MoveTowards(linkedObjects[0].position, pos1, 10f * Time.deltaTime);
+                    linkedObjects[0].position = Vector3.MoveTowards(linkedObjects[0].position, pos1, moveSpeed * Time.deltaTime);
 
                     //Drone 2
                     Vector3 pos2 = new Vector3(((Drone)drones[1]).getPosX() * unitWidth - 9.5f, ((Drone)drones[1]).getPosY() * unitHeight - 3.8f, 0f);
-                    linkedObjects[1].position = Vector3.MoveTowards(linkedObjects[1].position, pos2, 10f * Time.deltaTime);
+                    linkedObjects[1].position = Vector3.MoveTowards(linkedObjects[1].position, pos2, moveSpeed * Time.deltaTime);
 
                     //Drone 3
                     Vector3 pos3 = new Vector3(((Drone)drones[2]).getPosX() * unitWidth - 9.5f, ((Drone)drones[2]).getPosY() * unitHeight - 3.8f, 0f);
-                    linkedObjects[2].position = Vector3.MoveTowards(linkedObjects[2].position, pos3, 10f * Time.deltaTime);
+                    linkedObjects[2].position = Vector3.MoveTowards(linkedObjects[2].position, pos3, moveSpeed * Time.deltaTime);
 
                     //Drone 4
                     Vector3 pos4 = new Vector3(((Drone)drones[3]).getPosX() * unitWidth - 9.5f, ((Drone)drones[3]).getPosY() * unitHeight - 3.8f, 0f);
-                    linkedObjects[3].position = Vector3.MoveTowards(linkedObjects[3].position, pos4, 10f * Time.deltaTime);
+                    linkedObjects[3].position = Vector3.MoveTowards(linkedObjects[3].position, pos4, moveSpeed * Time.deltaTime);
 
                     if (pos1 == linkedObjects[0].position && pos2 == linkedObjects[1].position
                         && pos3 == linkedObjects[2].position && pos4 == linkedObjects[3].position) {
@@ -213,10 +215,10 @@ namespace Game {
                 drones[2] = new Drone(width, height, 0, height - 1);
                 drones[3] = new Drone(width, height, width - 1, height - 1);
 
-                linkedObjects[0].position = topLeftCorner;
-                linkedObjects[1].position = topRightCorner;
-                linkedObjects[2].position = bottomLeftCorner;
-                linkedObjects[3].position = bottomRightCorner;
+                linkedObjects[0].position = bottomLeftCorner;
+                linkedObjects[1].position = bottomRightCorner;
+                linkedObjects[2].position = topLeftCorner;
+                linkedObjects[3].position = topRightCorner;
             } else if (state.Contains("RANDOM")) {
                 if (state.Contains("QUADRANT")) {
                     drones[0] = new Drone(width, height, Random.Range(0, width / 2), Random.Range(0, height / 2));
