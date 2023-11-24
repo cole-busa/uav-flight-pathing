@@ -71,6 +71,10 @@ namespace Game {
             return this.heuristics;
         }
 
+        public (int x, int y) getGoal() {
+            return goal;
+        }
+
         public void setState(string newState) {
             this.state = newState;
         }
