@@ -4,33 +4,42 @@ using UnityEngine;
 
 namespace Game {
     public class Game : MonoBehaviour {
-        private GameState gameState;
-        private Drone drone;
-        private int moveCount;
-        private int iterations;
-        private int maxIterations;
-        private int droneCount;
-        private ArrayList movesPerIteration;
-        private ArrayList drones;
-        private ArrayList states;
-        private int stateIndex;
+        //Game settings variables
         private int width;
         private int height;
-        private Transform[] linkedObjects;
-        private Transform goal;
         private float unitWidth;
         private float unitHeight;
-        private float moveSpeed;
+        private int droneCount;
+        private int maxIterations;
         private bool withGraphics;
+        private float moveSpeed;
+
+        //Game core variables
+        private GameState gameState;
+        private Drone drone;
+        private ArrayList drones;
+        private ArrayList movesPerIteration;
+        private int moveCount;
+        private int iterations;
         private bool renderingSolo;
         private bool renderingMulti;
+        
+        //Locations on the map
         private Vector3 unrendered;
         private Vector3 spawn;
         private Vector3 topLeftCorner;
         private Vector3 topRightCorner;
         private Vector3 bottomLeftCorner;
         private Vector3 bottomRightCorner;
+        
+        //GameObject variables
+        private Transform goal;
+        private Transform[] linkedObjects;
 
+        //Scenario variables
+        private int stateIndex;
+        private ArrayList states;
+        
 
         // Start is called before the first frame update
         void Start() {
@@ -42,7 +51,7 @@ namespace Game {
             droneCount = 4;
             maxIterations = 1;
             withGraphics = true;
-            moveSpeed = 5f;
+            moveSpeed = 10f;
 
             //Game initialization
             gameState = new GameState(width, height, "GAME_SOLO_UNINFORMED");
@@ -58,9 +67,7 @@ namespace Game {
             renderingSolo = true;
             renderingMulti = false;
 
-            stateIndex = 0;
-            states = new ArrayList();
-
+            //Positions that will be useful to move GameObjects to
             unrendered = new Vector3(90f, 90f, 0f);
             spawn = new Vector3(0f, 0f, 0f);
             topLeftCorner = new Vector3(-9.5f, 3.8f, 0f);
@@ -68,19 +75,25 @@ namespace Game {
             bottomLeftCorner = new Vector3(-9.5f, -3.8f, 0f);
             bottomRightCorner = new Vector3(9.5f, -3.8f, 0f);
 
-            goal = GameObject.Find("person").transform;
-            goal.position = new Vector3(gameState.getGoal().x * unitWidth - 9.5f, gameState.getGoal().y * unitHeight - 3.8f, 0f);
+            //Accessing the GameObjects and setting them to their initial positions if we want to show graphics.
+            if (withGraphics) {
+                goal = GameObject.Find("person").transform;
+                goal.position = new Vector3(gameState.getGoal().x * unitWidth - 9.5f, gameState.getGoal().y * unitHeight - 3.8f, 0f);
 
-            linkedObjects = new Transform[4];
-            linkedObjects[0] = GameObject.Find("drone 1").transform;
-            linkedObjects[1] = GameObject.Find("drone 2").transform;
-            linkedObjects[2] = GameObject.Find("drone 3").transform;
-            linkedObjects[3] = GameObject.Find("drone 4").transform;
-            linkedObjects[0].position = bottomLeftCorner;
-            linkedObjects[1].position = unrendered;
-            linkedObjects[2].position = unrendered;
-            linkedObjects[3].position = unrendered;
+                linkedObjects = new Transform[4];
+                linkedObjects[0] = GameObject.Find("drone 1").transform;
+                linkedObjects[1] = GameObject.Find("drone 2").transform;
+                linkedObjects[2] = GameObject.Find("drone 3").transform;
+                linkedObjects[3] = GameObject.Find("drone 4").transform;
+                linkedObjects[0].position = bottomLeftCorner;
+                linkedObjects[1].position = unrendered;
+                linkedObjects[2].position = unrendered;
+                linkedObjects[3].position = unrendered;
+            }
 
+            //Set up the states ArrayList that contains the list of scenarios to explore in order
+            stateIndex = 0;
+            states = new ArrayList();
 
             //The Solo Uninformed scenario involves one drone that starts at (0, 0)
             //and chooses randomly between adjacent tiles, only avoiding those already explored.
@@ -126,184 +139,282 @@ namespace Game {
             //and choose between adjacent tiles based on the perfect Euclidean Distance of each tile
             //and a random tile chosen at runtime. They also avoid tiles all of them have explored (shared memory).
             states.Add("GAME_MULTI_CORNER_BADLY_INFORMED");
+
+            //Generic state for the end of the game.
             states.Add("GAME_WIN");
         }
 
         // Update is called once per frame
         void FixedUpdate() {
+            //If graphics are enabled, render the respective games.
             if (withGraphics) {
                 if (renderingSolo) {
-                    Vector3 pos1 = new Vector3(drone.getPosX() * unitWidth - 9.5f, drone.getPosY() * unitHeight - 3.8f, 0f);
-                    linkedObjects[0].position = Vector3.MoveTowards(linkedObjects[0].position, pos1, moveSpeed * Time.deltaTime);
-
-                    if (pos1 == linkedObjects[0].position) {
-                        if (iterations == maxIterations) {
-                            renderingMulti = true;
-                            
-                            linkedObjects[0].position = bottomLeftCorner;
-                            linkedObjects[1].position = bottomLeftCorner;
-                            linkedObjects[2].position = bottomLeftCorner;
-                            linkedObjects[3].position = bottomLeftCorner;
-                        }
-                        renderingSolo = false;
-                    }
+                    RenderSoloGame();
                 } 
                 if (renderingMulti) {
-                    //Drone 1
-                    Vector3 pos1 = new Vector3(((Drone) drones[0]).getPosX() * unitWidth - 9.5f, ((Drone) drones[0]).getPosY() * unitHeight - 3.8f, 0f);
-                    linkedObjects[0].position = Vector3.MoveTowards(linkedObjects[0].position, pos1, moveSpeed * Time.deltaTime);
-
-                    //Drone 2
-                    Vector3 pos2 = new Vector3(((Drone)drones[1]).getPosX() * unitWidth - 9.5f, ((Drone)drones[1]).getPosY() * unitHeight - 3.8f, 0f);
-                    linkedObjects[1].position = Vector3.MoveTowards(linkedObjects[1].position, pos2, moveSpeed * Time.deltaTime);
-
-                    //Drone 3
-                    Vector3 pos3 = new Vector3(((Drone)drones[2]).getPosX() * unitWidth - 9.5f, ((Drone)drones[2]).getPosY() * unitHeight - 3.8f, 0f);
-                    linkedObjects[2].position = Vector3.MoveTowards(linkedObjects[2].position, pos3, moveSpeed * Time.deltaTime);
-
-                    //Drone 4
-                    Vector3 pos4 = new Vector3(((Drone)drones[3]).getPosX() * unitWidth - 9.5f, ((Drone)drones[3]).getPosY() * unitHeight - 3.8f, 0f);
-                    linkedObjects[3].position = Vector3.MoveTowards(linkedObjects[3].position, pos4, moveSpeed * Time.deltaTime);
-
-                    if (pos1 == linkedObjects[0].position && pos2 == linkedObjects[1].position
-                        && pos3 == linkedObjects[2].position && pos4 == linkedObjects[3].position) {
-                        renderingMulti = false;
-                    }
+                    RenderMultiGame();
                 }
             }
+
+            //If we are not currently moving drones, find the next move
             if (!renderingSolo && !renderingMulti) {
                 string state = gameState.getState();
                 GenericGame(state);
             }
         }
 
+        void RenderSoloGame() {
+            //Move the first drone GameObject toward the drone's actual position.
+            Vector3 pos1 = new Vector3(drone.getPosX() * unitWidth - 9.5f, drone.getPosY() * unitHeight - 3.8f, 0f);
+            linkedObjects[0].position = Vector3.MoveTowards(linkedObjects[0].position, pos1, moveSpeed * Time.deltaTime);
+
+            //If the GameObject has reached its destination
+            if (pos1 == linkedObjects[0].position) {
+                //If we are at the goal, reset the current iteration.
+                if (linkedObjects[0].position == goal.position) {
+                    ResetIteration("GAME_SOLO_UNINFORMED", false);
+                }
+                //If we have reached the max number of iterations, move on to the multi game by rendering every drone.
+                if (iterations == maxIterations) {
+                    linkedObjects[0].position = bottomLeftCorner;
+                    linkedObjects[1].position = bottomLeftCorner;
+                    linkedObjects[2].position = bottomLeftCorner;
+                    linkedObjects[3].position = bottomLeftCorner;
+                }
+                //Stop rendering and allow the game to decide the next move.
+                renderingSolo = false;
+            }
+        }
+
+        void RenderMultiGame() {
+            //Move the drone GameObjects toward each drone's actual position.
+            //Drone 1
+            Vector3 pos1 = new Vector3(((Drone) drones[0]).getPosX() * unitWidth - 9.5f, ((Drone) drones[0]).getPosY() * unitHeight - 3.8f, 0f);
+            linkedObjects[0].position = Vector3.MoveTowards(linkedObjects[0].position, pos1, moveSpeed * Time.deltaTime);
+
+            //Drone 2
+            Vector3 pos2 = new Vector3(((Drone)drones[1]).getPosX() * unitWidth - 9.5f, ((Drone)drones[1]).getPosY() * unitHeight - 3.8f, 0f);
+            linkedObjects[1].position = Vector3.MoveTowards(linkedObjects[1].position, pos2, moveSpeed * Time.deltaTime);
+
+            //Drone 3
+            Vector3 pos3 = new Vector3(((Drone)drones[2]).getPosX() * unitWidth - 9.5f, ((Drone)drones[2]).getPosY() * unitHeight - 3.8f, 0f);
+            linkedObjects[2].position = Vector3.MoveTowards(linkedObjects[2].position, pos3, moveSpeed * Time.deltaTime);
+
+            //Drone 4
+            Vector3 pos4 = new Vector3(((Drone)drones[3]).getPosX() * unitWidth - 9.5f, ((Drone)drones[3]).getPosY() * unitHeight - 3.8f, 0f);
+            linkedObjects[3].position = Vector3.MoveTowards(linkedObjects[3].position, pos4, moveSpeed * Time.deltaTime);
+
+            //If every drone has reached its destination
+            if (pos1 == linkedObjects[0].position && pos2 == linkedObjects[1].position
+                && pos3 == linkedObjects[2].position && pos4 == linkedObjects[3].position) {
+                //If one of the drones is at the goal, reset the current iteration.
+                if (linkedObjects[0].position == goal.position || linkedObjects[1].position == goal.position
+                || linkedObjects[2].position == goal.position || linkedObjects[3].position == goal.position) {
+                    ResetIteration(gameState.getState(), false);
+                }
+                //Stop rendering and allow the game to decide the next move.
+                renderingMulti = false;
+            }
+        }
+
+        //Generic game helper function that deals with resetting iterations and telling which game to play
+        void GenericGame(string state) {
+            //If the game is over, return
+            if (state == "GAME_WIN")
+                    return;
+
+            //If we are at the max iterations
+            if (iterations == maxIterations) {
+                //Calculate the average moves over the scenario and print them to the console.
+                int averageMoves = FindAverageMoves();
+                Debug.Log("THE " + state + " SCENARIO TOOK " + averageMoves + " AVERAGE MOVES!");
+
+                //Move on to the next state by hard resetting.
+                stateIndex++;
+                ResetIteration((string)states[stateIndex], true);
+                
+                //Turn on rendering and return.
+                renderingMulti = true;
+                return;
+            }
+
+            //Play the game depending on the state.
+            if (state.Contains("SOLO"))
+                PlaySoloGame();
+            else
+                PlayMultiGame(state);
+        }
+
         //Helper function to calculate the average moves over all iterations
         int FindAverageMoves() {
             int sum = 0;
-            foreach (int i in movesPerIteration) {
+
+            foreach (int i in movesPerIteration)
                 sum += i;
-            }
+
             int averageMoves = sum / movesPerIteration.Count;
             return averageMoves;
         }
 
         //Helper function to reset the current iteration
         void ResetIteration(string state, bool hardReset) {
+            if (state == "GAME_WIN") {
+                //If the game is over, move all GameObjects to the unrendered position if we are using graphics. Return either way.
+                if (withGraphics) {
+                    goal.position = unrendered;
+                    linkedObjects[0].position = unrendered;
+                    linkedObjects[1].position = unrendered;
+                    linkedObjects[2].position = unrendered;
+                    linkedObjects[3].position = unrendered;
+                }
+                return;
+            }
+
             if (hardReset) {
-                movesPerIteration = new ArrayList();
+                //If we are doing a hard reset, empty the list of moves and set iterations back to zero.
+                movesPerIteration.Clear();
                 iterations = 0;
             } else {
+                //Otherwise, add the current move count to the ArrayList and increment the iteration count.
                 movesPerIteration.Add(moveCount);
                 iterations++;
             }
+
+            //Reset the move count and the game state object, which will create a new goal position.
             moveCount = 0;
             gameState = new GameState(width, height, state);
-            goal.position = new Vector3(gameState.getGoal().x * unitWidth - 9.5f, gameState.getGoal().y * unitHeight - 3.8f, 0f);
-            if (state == "GAME_SOLO_UNINFORMED") {
-                drone = new Drone(width, height);
 
-                linkedObjects[0].position = bottomLeftCorner;
+            //Move the goal to the new goal position.
+            if (withGraphics)
+                goal.position = new Vector3(gameState.getGoal().x * unitWidth - 9.5f, gameState.getGoal().y * unitHeight - 3.8f, 0f);
+
+            //If statement for determining spawn locations for the drones.
+            if (state == "GAME_SOLO_UNINFORMED") {
+                //In the solo uninformed scenario, we want to move the drone to the origin.
+                drone = new Drone(width, height);
+                
+                //Move the GameObject too if graphics are enabled.
+                if (withGraphics) 
+                    linkedObjects[0].position = bottomLeftCorner;
+
             } else if (state.Contains("ORIGIN")) {
                 for (int i = 0; i < drones.Count; i++) {
+                    //In any multi origin scenario, we want to move the drones to the origin.
                     drones[i] = new Drone(width, height);
 
-                    linkedObjects[i].position = bottomLeftCorner;
+                    //Move the GameObjects too if graphics are enabled.
+                    if (withGraphics)
+                        linkedObjects[i].position = bottomLeftCorner;
                 }
             } else if (state.Contains("CORNER")) {
+                //In any multi corner scenario, we want to move the drones to the corners.
                 drones[0] = new Drone(width, height, 0, 0);
                 drones[1] = new Drone(width, height, width - 1, 0);
                 drones[2] = new Drone(width, height, 0, height - 1);
                 drones[3] = new Drone(width, height, width - 1, height - 1);
 
-                linkedObjects[0].position = bottomLeftCorner;
-                linkedObjects[1].position = bottomRightCorner;
-                linkedObjects[2].position = topLeftCorner;
-                linkedObjects[3].position = topRightCorner;
+                if (withGraphics) {
+                    //Move the GameObjects too if graphics are enabled.
+                    linkedObjects[0].position = bottomLeftCorner;
+                    linkedObjects[1].position = bottomRightCorner;
+                    linkedObjects[2].position = topLeftCorner;
+                    linkedObjects[3].position = topRightCorner;
+                }
             } else if (state.Contains("RANDOM")) {
                 if (state.Contains("QUADRANT")) {
+                    //In any multi random quadrant scenario, we want to move the drones to a random position in each quadrant.
                     drones[0] = new Drone(width, height, Random.Range(0, width / 2), Random.Range(0, height / 2));
                     drones[1] = new Drone(width, height, Random.Range(width / 2, width), Random.Range(0, height / 2));
                     drones[2] = new Drone(width, height, Random.Range(0, width / 2), Random.Range(height / 2, height));
                     drones[3] = new Drone(width, height, Random.Range(width / 2, width), Random.Range(height / 2, height));
 
-                    linkedObjects[0].position = new Vector3(((Drone)drones[0]).getPosX() * unitWidth - 9.5f, ((Drone)drones[0]).getPosY() * unitHeight - 3.8f, 0f);
-                    linkedObjects[1].position = new Vector3(((Drone)drones[1]).getPosX() * unitWidth - 9.5f, ((Drone)drones[1]).getPosY() * unitHeight - 3.8f, 0f);
-                    linkedObjects[2].position = new Vector3(((Drone)drones[2]).getPosX() * unitWidth - 9.5f, ((Drone)drones[2]).getPosY() * unitHeight - 3.8f, 0f);
-                    linkedObjects[3].position = new Vector3(((Drone)drones[3]).getPosX() * unitWidth - 9.5f, ((Drone)drones[3]).getPosY() * unitHeight - 3.8f, 0f);
+                    if (withGraphics) {
+                        //Move the GameObjects too if graphics are enabled.
+                        linkedObjects[0].position = new Vector3(((Drone)drones[0]).getPosX() * unitWidth - 9.5f, ((Drone)drones[0]).getPosY() * unitHeight - 3.8f, 0f);
+                        linkedObjects[1].position = new Vector3(((Drone)drones[1]).getPosX() * unitWidth - 9.5f, ((Drone)drones[1]).getPosY() * unitHeight - 3.8f, 0f);
+                        linkedObjects[2].position = new Vector3(((Drone)drones[2]).getPosX() * unitWidth - 9.5f, ((Drone)drones[2]).getPosY() * unitHeight - 3.8f, 0f);
+                        linkedObjects[3].position = new Vector3(((Drone)drones[3]).getPosX() * unitWidth - 9.5f, ((Drone)drones[3]).getPosY() * unitHeight - 3.8f, 0f);
+                    }
                 } else {
                     for (int i = 0; i < drones.Count; i++) {
+                        //In any multi random scenario besides random quadrant, we want to move the drones to a random position.
                         drones[i] = new Drone(width, height, Random.Range(0, width), Random.Range(0, height));
 
-                        linkedObjects[i].position = new Vector3(((Drone)drones[i]).getPosX() * unitWidth - 9.5f, ((Drone)drones[i]).getPosY() * unitHeight - 3.8f, 0f);
+                        //Move the GameObjects too if graphics are enabled.
+                        if (withGraphics)
+                            linkedObjects[i].position = new Vector3(((Drone)drones[i]).getPosX() * unitWidth - 9.5f, ((Drone)drones[i]).getPosY() * unitHeight - 3.8f, 0f);
                     }
                 }
             }
         }
 
-        //Solo game helper function that decides the moves of one drone
+        //Solo game helper function that decides the moves of one drone.
         void PlaySoloGame() {
+            //Increment the move count at the beginning of each turn.
             moveCount++;
 
+            //Access game state information.
             int[,] map = gameState.getMap();
             bool[,] explored = gameState.getGlobalExplored();
             float[,] heuristics = gameState.getHeuristics();
 
+            //Find the list of adjacent spaces.
             ArrayList adjacent = drone.adjacent(map);
+
+            //Find the move from the list of adjacent spaces.
             (int x, int y) decision = (0, 0);
             decision = drone.findMove(map, explored, heuristics, adjacent);
+
+            //Move to the decision location and mark it as explored.
             drone.move(decision);
             explored[decision.y, decision.x] = true;
 
-            if (map[decision.y, decision.x] == 1) {
+            //If we are at the goal and graphics are off, reset the current iteration.
+            if (map[decision.y, decision.x] == 1 && !withGraphics)
                 ResetIteration("GAME_SOLO_UNINFORMED", false);
-            }
-            renderingSolo = true;
+            
+            //If graphics are on, start rendering after each move has been decided.
+            if (withGraphics)
+                renderingSolo = true;
         }
 
-        //Multi game helper function that decides the moves of four drones
+        //Multi game helper function that decides the moves of four drones.
         void PlayMultiGame(string state) {
+            //Increment the move count at the beginning of each turn.
             moveCount++;
 
+            //Access game state information.
             int[,] map = gameState.getMap();
             bool[,] explored = gameState.getGlobalExplored();
             float[,] heuristics = gameState.getHeuristics();
 
+            //Iterate through each drone.
             foreach (Drone d in drones) {
+                //If we are uninformed, the drones should not have a shared explored array.
                 if (state.Contains("UNINFORMED"))
                     explored = d.getExplored();
 
+                //Find the list of adjacent spaces.
                 ArrayList adjacent = d.adjacent(map);
+
+                //Find the move from the list of adjacent spaces.
                 (int x, int y) decision = (0, 0);
                 decision = d.findMove(map, explored, heuristics, adjacent);
+
+                //Move to the decision location and mark it as explored.
                 d.move(decision);
                 explored[decision.y, decision.x] = true;
 
-                if (map[decision.y, decision.x] == 1) {
+                //If we are at the goal and graphics are off, reset the current iteration.
+                if (map[decision.y, decision.x] == 1 && !withGraphics) {
                     ResetIteration(state, false);
                     return;
                 }
             }
-            renderingMulti = true;
-        }
-
-        //Generic game helper function that deals with resetting iterations and telling which game to play
-        void GenericGame(string state) {
-            if (iterations == maxIterations) {
-                if (state == "GAME_WIN")
-                    return;
-                int averageMoves = FindAverageMoves();
-                Debug.Log("THE " + state + " SCENARIO TOOK " + averageMoves + " AVERAGE MOVES!");
-                stateIndex++;
-                ResetIteration((string)states[stateIndex], true);
+            
+            //If graphics are on, start rendering after each move has been decided.
+            if (withGraphics)
                 renderingMulti = true;
-                return;
-            }
-            if (state.Contains("SOLO"))
-                PlaySoloGame();
-            else
-                PlayMultiGame(state);
         }
     }
 }
-
-
