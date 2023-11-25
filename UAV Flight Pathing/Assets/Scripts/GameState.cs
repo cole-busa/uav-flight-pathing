@@ -18,7 +18,7 @@ namespace Game {
             this.map = new int[width, height];
             this.globalExplored = new bool[width, height];
             globalExplored[0, 0] = true;
-            this.heuristics = new float[10, 10];
+            this.heuristics = new float[width, height];
             this.state = "GAME_SOLO_UNINFORMED";
             int randY = Random.Range(0, map.GetLength(0));
             int randX = Random.Range(0, map.GetLength(1));
@@ -31,7 +31,6 @@ namespace Game {
             this.height = height;
             this.map = new int[width, height];
             this.globalExplored = new bool[width, height];
-            globalExplored[0, 0] = true;
             this.heuristics = new float[width, height];
             this.state = state;
             int randY = Random.Range(0, map.GetLength(0));
@@ -52,6 +51,7 @@ namespace Game {
         }
 
         public void setGoalPos(int posX, int posY) {
+            map[goal.y, goal.x] = 0;
             map[posY, posX] = 1;
         }
 
@@ -111,5 +111,3 @@ namespace Game {
         }
     }
 }
-
-

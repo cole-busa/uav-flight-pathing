@@ -25,7 +25,7 @@ namespace Game {
             this.width = width;
             this.height = height;
             this.explored = new bool[width, height];
-            explored[0, 0] = true;
+            explored[posY, posX] = true;
         }
 
         public int getPosX() {

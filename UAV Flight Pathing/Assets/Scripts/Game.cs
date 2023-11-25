@@ -44,8 +44,8 @@ namespace Game {
         // Start is called before the first frame update
         void Start() {
             //Game settings
-            width = 10;
-            height = 10;
+            width = 20;
+            height = 20;
             unitWidth = 19f / width;
             unitHeight = 7.6f / height;
             droneCount = 4;
@@ -140,6 +140,12 @@ namespace Game {
             //and a random tile chosen at runtime. They also avoid tiles all of them have explored (shared memory).
             states.Add("GAME_MULTI_CORNER_BADLY_INFORMED");
 
+            //The Multi Corner Decently Informed Moving Goal scenario involves four drones that start at each of the corners
+            //and choose between adjacent tiles based on the decent Euclidean Distance (plus or minus random noise) 
+            //of each tile and the initial goal. They also avoid tiles all of them have explored (shared memory).
+            //The goal will also start to move in after a random interval.
+            states.Add("GAME_MULTI_CORNER_DECENTLY_INFORMED_MOVING_GOAL");
+
             //Generic state for the end of the game.
             states.Add("GAME_WIN");
         }
@@ -207,13 +213,27 @@ namespace Game {
             //If every drone has reached its destination
             if (pos1 == linkedObjects[0].position && pos2 == linkedObjects[1].position
                 && pos3 == linkedObjects[2].position && pos4 == linkedObjects[3].position) {
-                //If one of the drones is at the goal, reset the current iteration.
+                //If one of the drones is at the goal, reset the current iteration, stop rendering, and return.
                 if (linkedObjects[0].position == goal.position || linkedObjects[1].position == goal.position
                 || linkedObjects[2].position == goal.position || linkedObjects[3].position == goal.position) {
                     ResetIteration(gameState.getState(), false);
+                    renderingMulti = false;
+                    return;
                 }
-                //Stop rendering and allow the game to decide the next move.
-                renderingMulti = false;
+
+                //If we are in the Moving Goal scenario, move the goal.
+                if (gameState.getState().Contains("MOVING_GOAL")) {
+                    Vector3 pos0 = new Vector3(drone.getPosX() * unitWidth - 9.5f, drone.getPosY() * unitHeight - 3.8f, 0f);
+                    goal.position = Vector3.MoveTowards(goal.position, pos0, moveSpeed * Time.deltaTime);
+
+                    if (pos0 == goal.position) {
+                        //Stop rendering and allow the game to decide the next move.
+                        renderingMulti = false;
+                    }
+                } else {
+                    //Stop rendering and allow the game to decide the next move.
+                    renderingMulti = false;
+                }
             }
         }
 
@@ -346,6 +366,10 @@ namespace Game {
                     }
                 }
             }
+
+            //If we are in the moving goal scenario, we are using the drone as a psuedo-goal, so update its position accordingly.
+            if (state.Contains("MOVING_GOAL"))
+                drone = new Drone(width, height, gameState.getGoal().x, gameState.getGoal().y);
         }
 
         //Solo game helper function that decides the moves of one drone.
@@ -410,6 +434,32 @@ namespace Game {
                     ResetIteration(state, false);
                     return;
                 }
+            }
+
+            //If we are in the Moving Goal scenario, we want to move the goal.
+            if (state.Contains("MOVING_GOAL")) {
+                //Find the list of adjacent spaces using the drone as a psuedo-goal.
+                ArrayList adjacent = drone.adjacent(map);
+
+                //Create an all-zero heuristic array for the goal.
+                float[,] goalHeuristics = new float[width, height];
+
+                //Create an all-zero map array for the goal so it does not try to chase itself.
+                int[,] goalMap = new int[width, height];
+
+                //Use the drone's explored array only.
+                explored = drone.getExplored();
+
+                //Find the move from the list of adjacent spaces.
+                (int x, int y) decision = (0, 0);
+                decision = drone.findMove(goalMap, explored, goalHeuristics, adjacent);
+
+                //Move to the decision location and mark it as explored.
+                drone.move(decision);
+                explored[decision.y, decision.x] = true;
+
+                //Move the goal on the map to the new position.
+                gameState.setGoalPos(decision.x, decision.y);
             }
             
             //If graphics are on, start rendering after each move has been decided.
