@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace Game {
@@ -44,8 +45,8 @@ namespace Game {
         // Start is called before the first frame update.
         void Start() {
             //Game settings.
-            width = 20;
-            height = 20;
+            width = 30;
+            height = 30;
             unitWidth = 19f / width;
             unitHeight = 7.6f / height;
             droneCount = 4;
@@ -376,12 +377,29 @@ namespace Game {
 
             if (state.Contains("QUADRANT_LIMITED")) {
                 int [,] map = gameState.getMap();
-                int[,][] quadrants = map.Chunk(2).Select(rowChunk => rowChunk.Chunk(2).ToArray()).ToArray();
+                int[,] topLeftQuadrant = new int[height / 2, width / 2];
+                int[,] topRightQuadrant = new int[height / 2, width / 2];
+                int[,] bottomLeftQuadrant = new int[height / 2, width / 2];
+                int[,] bottomRightQuadrant = new int[height / 2, width / 2];
 
-                ((Drone) drones[0]).setPlayzone(quadrants[0, 0], 0, 0);
-                ((Drone) drones[1]).setPlayzone(quadrants[0, 1], width/2, 0);
-                ((Drone) drones[2]).setPlayzone(quadrants[1, 0], 0, height/2);
-                ((Drone) drones[3]).setPlayzone(quadrants[1, 1], width/2, height/2);
+                for (int i = 0; i < height; i++) {
+                    for (int j = 0; j < width; j++) {
+                        if (i < height / 2 && j < width / 2) {
+                            topLeftQuadrant[i, j] = map[i, j];
+                        } else if (i < height / 2 && j >= width / 2) {
+                            topRightQuadrant[i, j - width / 2] = map[i, j];
+                        } else if (i >= height / 2 && j < width / 2) {
+                            bottomLeftQuadrant[i - height / 2, j] = map[i, j];
+                        } else {
+                            bottomRightQuadrant[i - height / 2, j - width / 2] = map[i, j];
+                        }
+                    }
+                }
+
+                ((Drone) drones[0]).setPlayzone(topLeftQuadrant, 0, 0);
+                ((Drone) drones[1]).setPlayzone(topRightQuadrant, width/2, 0);
+                ((Drone) drones[2]).setPlayzone(bottomLeftQuadrant, 0, height/2);
+                ((Drone) drones[3]).setPlayzone(bottomRightQuadrant, width/2, height/2);
             }
 
             //If we are in the moving goal scenario, we are using the drone as a psuedo-goal, so update its position accordingly.
@@ -404,7 +422,7 @@ namespace Game {
 
             //Find the move from the list of adjacent spaces.
             (int x, int y) decision = (0, 0);
-            decision = drone.findMove(map, explored, heuristics, adjacent);
+            decision = drone.findMove(map, explored, heuristics, adjacent, false);
 
             //Move to the decision location and mark it as explored.
             drone.move(decision);
@@ -460,8 +478,9 @@ namespace Game {
 
             //If we are in the Moving Goal scenario, we want to move the goal.
             if (state.Contains("MOVING_GOAL")) {
+
                 //Find the list of adjacent spaces using the drone as a psuedo-goal.
-                ArrayList adjacent = drone.adjacent(map);
+                ArrayList adjacent = drone.adjacent(map, false);
 
                 //Create an all-zero heuristic array for the goal.
                 float[,] goalHeuristics = new float[width, height];
@@ -474,7 +493,7 @@ namespace Game {
 
                 //Find the move from the list of adjacent spaces.
                 (int x, int y) decision = (0, 0);
-                decision = drone.findMove(goalMap, explored, goalHeuristics, adjacent);
+                decision = drone.findMove(goalMap, explored, goalHeuristics, adjacent, false);
 
                 //Move to the decision location and mark it as explored.
                 drone.move(decision);
