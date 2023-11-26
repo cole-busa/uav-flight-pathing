@@ -146,6 +146,13 @@ namespace Game {
             //The goal will also start to move in after a random interval.
             states.Add("GAME_MULTI_CORNER_DECENTLY_INFORMED_MOVING_GOAL");
 
+
+            //The Multi Quadrant Limited Corner Decently Informed Moving Goal scenario involves four drones that start at each of the corners
+            //and choose between adjacent tiles based on the decent Euclidean Distance (plus or minus random noise) 
+            //of each tile and the initial goal. Each drone will be confined to its own quadrant.
+            //The goal will also start to move in after a random interval.
+            states.Add("GAME_MULTI_QUADRANT_LIMITED_CORNER_DECENTLY_INFORMED_MOVING_GOAL");
+
             //Generic state for the end of the game.
             states.Add("GAME_WIN");
         }
@@ -367,6 +374,16 @@ namespace Game {
                 }
             }
 
+            if (state.Contains("QUADRANT_LIMITED")) {
+                int [,] map = gameState.getMap();
+                int[,][] quadrants = map.Chunk(2).Select(rowChunk => rowChunk.Chunk(2).ToArray()).ToArray();
+
+                ((Drone) drones[0]).setPlayzone(quadrants[0, 0], 0, 0);
+                ((Drone) drones[1]).setPlayzone(quadrants[0, 1], width/2, 0);
+                ((Drone) drones[2]).setPlayzone(quadrants[1, 0], 0, height/2);
+                ((Drone) drones[3]).setPlayzone(quadrants[1, 1], width/2, height/2);
+            }
+
             //If we are in the moving goal scenario, we are using the drone as a psuedo-goal, so update its position accordingly.
             if (state.Contains("MOVING_GOAL"))
                 drone = new Drone(width, height, gameState.getGoal().x, gameState.getGoal().y);
@@ -383,7 +400,7 @@ namespace Game {
             float[,] heuristics = gameState.getHeuristics();
 
             //Find the list of adjacent spaces.
-            ArrayList adjacent = drone.adjacent(map);
+            ArrayList adjacent = drone.adjacent(map, false);
 
             //Find the move from the list of adjacent spaces.
             (int x, int y) decision = (0, 0);
@@ -418,12 +435,17 @@ namespace Game {
                 if (state.Contains("UNINFORMED"))
                     explored = d.getExplored();
 
+                bool quadrantLimited = false;
+
+                if (state.Contains("QUADRANT_LIMITED"))
+                    quadrantLimited = true;
+
                 //Find the list of adjacent spaces.
-                ArrayList adjacent = d.adjacent(map);
+                ArrayList adjacent = d.adjacent(map, quadrantLimited);
 
                 //Find the move from the list of adjacent spaces.
                 (int x, int y) decision = (0, 0);
-                decision = d.findMove(map, explored, heuristics, adjacent);
+                decision = d.findMove(map, explored, heuristics, adjacent, quadrantLimited);
 
                 //Move to the decision location and mark it as explored.
                 d.move(decision);

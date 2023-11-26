@@ -9,6 +9,9 @@ namespace Game {
         private int width;
         private int height;
         private bool[,] explored;
+        private int[,] playzone;
+        private int offsetX;
+        private int offsetY;
 
         public Drone(int width, int height) {
             this.posX = 0;
@@ -40,6 +43,12 @@ namespace Game {
             return explored;
         }
 
+        public void setPlayzone(int [,] playzone, int offsetX, int offsetY) {
+            this.playzone = playzone;
+            this.offsetX = offsetX;
+            this.offsetY = offsetY;
+        }
+
         public void move((int x, int y) pos) {
             int distance = Mathf.Abs(posX - pos.x) + Mathf.Abs(posY - pos.y);
             if (distance >= 1 && distance <= 2) {
@@ -48,7 +57,13 @@ namespace Game {
             }
         }
 
-        public ArrayList adjacent(int[,] map) {
+        public ArrayList adjacent(int[,] map, bool quadrantLimited) {
+            if (quadrantLimited) {
+                map = playzone;
+                posX -= offsetX;
+                posY -= offsetY;
+            }
+
             var posList = new ArrayList();
             if (posX == 0 && posY == 0) {
                 //Top left corner
@@ -109,16 +124,32 @@ namespace Game {
                 posList.Add((posX, posY + 1));
                 posList.Add((posX + 1, posY + 1));
             }
+
+            if (quadrantLimited) {
+                posX += offsetX;
+                posY += offsetY;
+            }
+
             return posList;
         }
 
-        public (int x, int y) findMove(int[,] map, bool[,] droneExplored, float[,] heuristics, ArrayList adjacent) {
+        public (int x, int y) findMove(int[,] map, bool[,] droneExplored, float[,] heuristics, ArrayList adjacent, bool quadrantLimited) {
             ArrayList move = new ArrayList();
 
             (int x, int y) firstPos = ((int x, int y)) adjacent[0];
+
+            if (quadrantLimited) {
+                firstPos = (firstPos.x + offsetX, firstPos.y + offsetY);
+            }
+
             float minHeuristic = heuristics[firstPos.y, firstPos.x];
 
             foreach ((int x, int y) pos in adjacent) {
+
+                if (quadrantLimited) {
+                    pos = (pos.x + offsetX, pos.y + offsetY);
+                }
+
                 if (map[pos.y, pos.x] == 1) {
                     //If adjacent to the goal
                     move.Clear();
