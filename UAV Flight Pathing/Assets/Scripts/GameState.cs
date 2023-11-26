@@ -53,6 +53,7 @@ namespace Game {
         public void setGoalPos(int posX, int posY) {
             map[goal.y, goal.x] = 0;
             map[posY, posX] = 1;
+            goal = (posX, posY);
         }
 
         public string getState() {

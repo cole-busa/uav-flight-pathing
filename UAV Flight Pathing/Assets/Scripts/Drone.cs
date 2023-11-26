@@ -114,7 +114,10 @@ namespace Game {
 
         public (int x, int y) findMove(int[,] map, bool[,] droneExplored, float[,] heuristics, ArrayList adjacent) {
             ArrayList move = new ArrayList();
-            
+
+            (int x, int y) firstPos = ((int x, int y)) adjacent[0];
+            float minHeuristic = heuristics[firstPos.y, firstPos.x];
+
             foreach ((int x, int y) pos in adjacent) {
                 if (map[pos.y, pos.x] == 1) {
                     //If adjacent to the goal
@@ -122,18 +125,12 @@ namespace Game {
                     move.Add(pos);
                     break;
                 } else if (!droneExplored[pos.y, pos.x]) {
-                    if (move.Count != 0) {
-                        (int x, int y) firstMove = ((int x, int y)) move[0];
-                        float currentHeuristic = heuristics[pos.y, pos.x];
-                        float minHeuristic = heuristics[firstMove.y, firstMove.x];
-                        if (currentHeuristic < minHeuristic) {
-                            move.Clear();
-                            move.Add(pos);
-                        } else if (currentHeuristic == minHeuristic) {
-                            move.Add(pos);
-                        }
-                    } else {
-                        //Add unexplored positions
+                    float currentHeuristic = heuristics[pos.y, pos.x];
+                    if (currentHeuristic < minHeuristic) {
+                        minHeuristic = currentHeuristic;
+                        move.Clear();
+                        move.Add(pos);
+                    } else if (currentHeuristic == minHeuristic) {
                         move.Add(pos);
                     }
                 }

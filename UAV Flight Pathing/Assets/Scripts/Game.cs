@@ -41,9 +41,9 @@ namespace Game {
         private ArrayList states;
         
 
-        // Start is called before the first frame update
+        // Start is called before the first frame update.
         void Start() {
-            //Game settings
+            //Game settings.
             width = 20;
             height = 20;
             unitWidth = 19f / width;
@@ -53,7 +53,7 @@ namespace Game {
             withGraphics = true;
             moveSpeed = 10f;
 
-            //Game initialization
+            //Game initialization.
             gameState = new GameState(width, height, "GAME_SOLO_UNINFORMED");
             drone = new Drone(width, height);
             drones = new ArrayList();
@@ -67,7 +67,7 @@ namespace Game {
             renderingSolo = true;
             renderingMulti = false;
 
-            //Positions that will be useful to move GameObjects to
+            //Positions that will be useful for moving GameObjects.
             unrendered = new Vector3(90f, 90f, 0f);
             spawn = new Vector3(0f, 0f, 0f);
             topLeftCorner = new Vector3(-9.5f, 3.8f, 0f);
@@ -91,7 +91,7 @@ namespace Game {
                 linkedObjects[3].position = unrendered;
             }
 
-            //Set up the states ArrayList that contains the list of scenarios to explore in order
+            //Set up the states ArrayList that contains the list of scenarios to explore in order.
             stateIndex = 0;
             states = new ArrayList();
 
