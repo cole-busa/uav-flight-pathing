@@ -5,8 +5,8 @@ using UnityEngine;
 namespace Game {
     public class GameState {
         private int[,] map;
-        private bool[,] globalExplored;
-        private float[,] heuristics;
+        private int[,] globalTimesExplored;
+        private float[,] globalHeuristics;
         private string state;
         private int width;
         private int height;
@@ -16,9 +16,9 @@ namespace Game {
             this.width = 10;
             this.height = 10;
             this.map = new int[width, height];
-            this.globalExplored = new bool[width, height];
-            globalExplored[0, 0] = true;
-            this.heuristics = new float[width, height];
+            this.globalTimesExplored = new int[width, height];
+            globalTimesExplored[0, 0] = 1;
+            this.globalHeuristics = new float[width, height];
             this.state = "GAME_SOLO_UNINFORMED";
             int randY = Random.Range(0, map.GetLength(0));
             int randX = Random.Range(0, map.GetLength(1));
@@ -30,83 +30,83 @@ namespace Game {
             this.width = width;
             this.height = height;
             this.map = new int[width, height];
-            this.globalExplored = new bool[width, height];
-            this.heuristics = new float[width, height];
+            this.globalTimesExplored = new int[width, height];
+            this.globalHeuristics = new float[width, height];
             this.state = state;
             int randY = Random.Range(0, map.GetLength(0));
             int randX = Random.Range(0, map.GetLength(1));
             map[randY, randX] = 1;
             goal = (randX, randY);
             if (state == "GAME_MULTI_ORIGIN_MANHATTAN_INFORMED") {
-                setManhattanDistanceHeuristic("perfect");
+                SetManhattanDistanceGlobalHeuristic("perfect");
             } else if (state == "GAME_MULTI_ORIGIN_EUCLIDEAN_INFORMED" || state == "GAME_MULTI_CORNER_PERFECTLY_INFORMED") {
-                setEuclideanDistanceHeuristic("perfect", (0,0));
+                SetEuclideanDistanceGlobalHeuristic("perfect", (0,0));
             } else if (state.Contains("DECENTLY")) {
-                setEuclideanDistanceHeuristic("decent", (0, 0));
+                SetEuclideanDistanceGlobalHeuristic("decent", (0, 0));
             } else if (state.Contains("BADLY")) {
                 randY = Random.Range(0, map.GetLength(0));
                 randX = Random.Range(0, map.GetLength(1));
-                setEuclideanDistanceHeuristic("bad", (randX, randY));
+                SetEuclideanDistanceGlobalHeuristic("bad", (randX, randY));
             }
         }
 
-        public void setGoalPos(int posX, int posY) {
+        public void SetGoalPos(int posX, int posY) {
             map[goal.y, goal.x] = 0;
             map[posY, posX] = 1;
             goal = (posX, posY);
         }
 
-        public string getState() {
+        public string GetState() {
             return this.state;
         }
 
-        public int[,] getMap() {
+        public int[,] GetMap() {
             return this.map;
         }
 
-        public bool[,] getGlobalExplored() {
-            return this.globalExplored;
+        public int[,] GetGlobalTimesExplored() {
+            return this.globalTimesExplored;
         }
 
-        public float[,] getHeuristics() {
-            return this.heuristics;
+        public float[,] GetGlobalHeuristics() {
+            return this.globalHeuristics;
         }
 
-        public (int x, int y) getGoal() {
+        public (int x, int y) GetGoal() {
             return goal;
         }
 
-        public void setState(string newState) {
+        public void SetState(string newState) {
             this.state = newState;
         }
 
-        public void setNoHeuristic() {
-            heuristics = new float[width, height];
+        public void SetNoHeuristic() {
+            globalHeuristics = new float[width, height];
         }
 
-        public void setManhattanDistanceHeuristic(string accuracy) {
-            for (int x = 0; x < heuristics.GetLength(1); x++) {
-                for (int y = 0; y < heuristics.GetLength(0); y++) {
+        public void SetManhattanDistanceGlobalHeuristic(string accuracy) {
+            for (int x = 0; x < globalHeuristics.GetLength(1); x++) {
+                for (int y = 0; y < globalHeuristics.GetLength(0); y++) {
                     float random = 0;
                     if (accuracy == "decent") {
                         random = Random.Range(-5.0f, 5.0f);
                     }
-                    heuristics[y, x] = Mathf.Abs(x - goal.x) + Mathf.Abs(y - goal.y) + random;
+                    globalHeuristics[y, x] = Mathf.Abs(x - goal.x) + Mathf.Abs(y - goal.y) + random;
                 }
             }
         }
 
-        public void setEuclideanDistanceHeuristic(string accuracy, (int x, int y) target) {
+        public void SetEuclideanDistanceGlobalHeuristic(string accuracy, (int x, int y) target) {
             if (accuracy == "bad") {
                 goal = target;
             }
-            for (int x = 0; x < heuristics.GetLength(1); x++) {
-                for (int y = 0; y < heuristics.GetLength(0); y++) {
+            for (int x = 0; x < globalHeuristics.GetLength(1); x++) {
+                for (int y = 0; y < globalHeuristics.GetLength(0); y++) {
                     float random = 0;
                     if (accuracy == "decent") {
                         random = Random.Range(-5.0f, 5.0f);
                     }
-                    heuristics[y, x] = Mathf.Sqrt(Mathf.Pow(x - goal.x, 2) + Mathf.Pow(y - goal.y,2)) + random;
+                    globalHeuristics[y, x] = Mathf.Sqrt(Mathf.Pow(x - goal.x, 2) + Mathf.Pow(y - goal.y,2)) + random;
                 }
             }
         }
