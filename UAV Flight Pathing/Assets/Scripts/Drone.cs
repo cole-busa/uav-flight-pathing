@@ -134,7 +134,9 @@ namespace Game {
         }
 
         public (int x, int y) findMove(int[,] map, bool[,] droneExplored, float[,] heuristics, ArrayList adjacent, bool quadrantLimited, string state, int moveCount) {
-            ArrayList move = new ArrayList();
+            ArrayList validMoves = new ArrayList();
+
+            ArrayList unexploredMoves = new ArrayList();
 
             if (quadrantLimited) {
                 for (int i = 0; i < adjacent.Count; i++) {
@@ -151,28 +153,35 @@ namespace Game {
             foreach ((int x, int y) pos in adjacent) {
                 if (map[pos.y, pos.x] == 1) {
                     //If adjacent to the goal
-                    move.Clear();
-                    move.Add(pos);
+                    validMoves.Clear();
+                    validMoves.Add(pos);
                     break;
-                } else if (!informationDecay && !droneExplored[pos.y, pos.x]) {
+                } else if (!droneExplored[pos.y, pos.x]) {
+                    unexploredMoves.Add(pos);
+
                     float currentHeuristic = heuristics[pos.y, pos.x];
+
                     if (currentHeuristic < minHeuristic) {
                         minHeuristic = currentHeuristic;
-                        move.Clear();
-                        move.Add(pos);
+                        validMoves.Clear();
+                        validMoves.Add(pos);
                     } else if (currentHeuristic == minHeuristic) {
-                        move.Add(pos);
+                        validMoves.Add(pos);
                     }
                 }
             }
             
-            if (move.Count == 0) {
+            if (informationDecay) {
+                validMoves = unexploredMoves;
+            }
+
+            if (validMoves.Count == 0) {
                 //If backed into a corner with all adjacent explored
-                move = adjacent;
+                validMoves = adjacent;
             }
             
             //Choose randomly between equivalent moves
-            return ((int x, int y))move[Random.Range(0, move.Count)];
+            return ((int x, int y))validMoves[Random.Range(0, validMoves.Count)];
         }
     }
 }
