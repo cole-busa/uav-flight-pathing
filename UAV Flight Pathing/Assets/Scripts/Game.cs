@@ -154,6 +154,13 @@ namespace Game {
             //The goal will also start to move in after a random interval.
             states.Add("GAME_MULTI_QUADRANT_LIMITED_CORNER_DECENTLY_INFORMED_MOVING_GOAL");
 
+            //The Multi Quadrant Limited Corner Decently Informed Information Decay Moving Goal scenario 
+            //involves four drones that start at each of the corners and choose between adjacent tiles based 
+            //on the decent Euclidean Distance (plus or minus random noise) of each tile and the initial goal 
+            //if a random float between 0 and 1 is less than 1 / sqrt(moveCount). Otherwise it will choose randomly.
+            //Each drone will be confined to its own quadrant. The goal will also start to move in after a random interval.
+            states.Add("GAME_MULTI_QUADRANT_LIMITED_CORNER_DECENTLY_INFORMED_INFORMATION_DECAY_MOVING_GOAL");
+
             //Generic state for the end of the game.
             states.Add("GAME_WIN");
         }
@@ -422,7 +429,7 @@ namespace Game {
 
             //Find the move from the list of adjacent spaces.
             (int x, int y) decision = (0, 0);
-            decision = drone.findMove(map, explored, heuristics, adjacent, false);
+            decision = drone.findMove(map, explored, heuristics, adjacent, false, gameState.getState(), moveCount);
 
             //Move to the decision location and mark it as explored.
             drone.move(decision);
@@ -463,7 +470,7 @@ namespace Game {
 
                 //Find the move from the list of adjacent spaces.
                 (int x, int y) decision = (0, 0);
-                decision = d.findMove(map, explored, heuristics, adjacent, quadrantLimited);
+                decision = d.findMove(map, explored, heuristics, adjacent, quadrantLimited, gameState.getState(), moveCount);
 
                 //Move to the decision location and mark it as explored.
                 d.move(decision);
@@ -493,7 +500,7 @@ namespace Game {
 
                 //Find the move from the list of adjacent spaces.
                 (int x, int y) decision = (0, 0);
-                decision = drone.findMove(goalMap, explored, goalHeuristics, adjacent, false);
+                decision = drone.findMove(goalMap, explored, goalHeuristics, adjacent, false, gameState.getState(), moveCount);
 
                 //Move to the decision location and mark it as explored.
                 drone.move(decision);
