@@ -82,7 +82,7 @@ namespace Game {
                 for (int y = 0; y < heuristics.GetLength(0); y++) {
                     ArrayList adjacentTiles = GetAdjacentTiles(width, height, (x, y));
 
-                    int numExplored = 0;
+                    int numExplored = globalTimesExplored[y, x];
                     for (int i = 0; i < adjacentTiles.Count; i++) {
                         (int x, int y) pos = ((int x, int y)) adjacentTiles[i];
                         if (globalTimesExplored[pos.y, pos.x] > 0)
@@ -99,6 +99,7 @@ namespace Game {
             if (distance >= 1 && distance <= 2) {
                 posX = pos.x;
                 posY = pos.y;
+                timesExplored[pos.y, pos.x]++;
             }
         }
 
@@ -195,16 +196,16 @@ namespace Game {
             bool informationDecay = state.Contains("INFORMATION_DECAY") && 1f / Mathf.Sqrt(moveCount) < Random.Range(0f, 1f);
 
             foreach ((int x, int y) pos in adjacent) {
+                if (globalTimesExplored[pos.y, pos.x] == 0) {
+                    unexploredMoves.Add(pos);
+                }
                 if (map[pos.y, pos.x] == 1) {
                     //If adjacent to the goal
                     validMoves.Clear();
                     validMoves.Add(pos);
                     break;
-                } else if (globalTimesExplored[pos.y, pos.x] == 0) {
-                    unexploredMoves.Add(pos);
-
+                } else if (!state.Contains("LY_INFORMED") || globalTimesExplored[pos.y, pos.x] == 0) {
                     float currentHeuristic = globalHeuristics[pos.y, pos.x];
-
                     if (currentHeuristic < minHeuristic) {
                         minHeuristic = currentHeuristic;
                         validMoves.Clear();

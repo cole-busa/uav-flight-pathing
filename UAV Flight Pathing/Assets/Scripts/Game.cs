@@ -475,10 +475,7 @@ namespace Game {
             
             //Move to the decision location and mark it as explored.
             drone.Move(decision);
-            globalTimesExplored[decision.y, decision.x]++;
-            drone.UpdateExploredHeuristics(true, globalTimesExplored);
-            heuristics = drone.GetHeuristics();
-            Debug.Log(heuristics[decision.y, decision.x]);
+            drone.UpdateExploredHeuristics(false, globalTimesExplored);
 
             //If we are at the goal and graphics are off, reset the current iteration.
             if (map[decision.y, decision.x] == 1 && !withGraphics)
@@ -500,7 +497,7 @@ namespace Game {
             float[,] heuristics = gameState.GetGlobalHeuristics();
 
             //If we are uninformed, the drones should not have a shared explored array.
-            bool informed = state.Contains("UNINFORMED");
+            bool informed = !state.Contains("UNINFORMED");
 
             //Iterate through each drone.
             foreach (Drone d in drones) {
@@ -516,6 +513,7 @@ namespace Game {
                 //Move to the decision location and mark it as explored.
                 d.Move(decision);
                 globalTimesExplored[decision.y, decision.x]++;
+                d.UpdateExploredHeuristics(informed, globalTimesExplored);
 
                 //If we are at the goal and graphics are off, reset the current iteration.
                 if (map[decision.y, decision.x] == 1 && !withGraphics) {
