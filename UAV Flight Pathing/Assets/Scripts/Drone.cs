@@ -170,14 +170,16 @@ namespace Game {
         }
 
         public (int x, int y) FindMove(int[,] map, bool informed, int[,] globalTimesExplored, float[,] globalHeuristics, bool quadrantLimited, string state, int moveCount) {
+            float fastestRoute = (height / 2) * Mathf.Sqrt(2);
+            bool informationDecay = state.Contains("INFORMATION_DECAY") && fastestRoute / moveCount < Random.Range(0f, 1f);
+        
             if (!informed) {
                 globalTimesExplored = timesExplored;
-                globalHeuristics = heuristics;
             }
         
-            ArrayList validMoves = new ArrayList();
-
-            ArrayList unexploredMoves = new ArrayList();
+            ArrayList bestGlobalHeuristicMoves = new ArrayList();
+            ArrayList bestLocalHeuristicMoves = new ArrayList();
+            ArrayList bestMoves = new ArrayList();
 
             ArrayList adjacent = new ArrayList();
             if (quadrantLimited) {
@@ -191,42 +193,47 @@ namespace Game {
             }
 
             (int x, int y) firstPos = ((int x, int y)) adjacent[0];
-            float minHeuristic = globalHeuristics[firstPos.y, firstPos.x];
+            float minGlobalHeuristic = globalHeuristics[firstPos.y, firstPos.x];
+            float minLocalHeuristic = heuristics[firstPos.y, firstPos.x];
 
-            bool informationDecay = state.Contains("INFORMATION_DECAY") && 1f / Mathf.Sqrt(moveCount) < Random.Range(0f, 1f);
+            
 
             foreach ((int x, int y) pos in adjacent) {
-                if (globalTimesExplored[pos.y, pos.x] == 0) {
-                    unexploredMoves.Add(pos);
-                }
                 if (map[pos.y, pos.x] == 1) {
-                    //If adjacent to the goal
-                    validMoves.Clear();
-                    validMoves.Add(pos);
-                    break;
-                } else if (!state.Contains("LY_INFORMED") || globalTimesExplored[pos.y, pos.x] == 0) {
-                    float currentHeuristic = globalHeuristics[pos.y, pos.x];
-                    if (currentHeuristic < minHeuristic) {
-                        minHeuristic = currentHeuristic;
-                        validMoves.Clear();
-                        validMoves.Add(pos);
-                    } else if (currentHeuristic == minHeuristic) {
-                        validMoves.Add(pos);
+                    //If adjacent to the goal return that position
+                    return pos;
+                }
+                if (globalTimesExplored[pos.y, pos.x] == 0) {
+                    //Update the list of best moves according to the global heuristic
+                    float currentGlobalHeuristic = globalHeuristics[pos.y, pos.x];
+                    if (currentGlobalHeuristic < minGlobalHeuristic) {
+                        minGlobalHeuristic = currentGlobalHeuristic;
+                        bestGlobalHeuristicMoves.Clear();
+                        bestGlobalHeuristicMoves.Add(pos);
+                    } else if (currentGlobalHeuristic == minGlobalHeuristic) {
+                        bestGlobalHeuristicMoves.Add(pos);
                     }
+                }
+                
+                //Update the list of best moves according to the local heuristic
+                float currentLocalHeuristic = heuristics[pos.y, pos.x];
+                if (currentLocalHeuristic < minLocalHeuristic) {
+                    minLocalHeuristic = currentLocalHeuristic;
+                    bestLocalHeuristicMoves.Clear();
+                    bestLocalHeuristicMoves.Add(pos);
+                } else if (currentLocalHeuristic == minLocalHeuristic) {
+                    bestLocalHeuristicMoves.Add(pos);
                 }
             }
             
-            if (informationDecay) {
-                validMoves = unexploredMoves;
-            }
-
-            if (validMoves.Count == 0) {
-                //If backed into a corner with all adjacent explored
-                validMoves = adjacent;
+            if (informationDecay || !informed || bestGlobalHeuristicMoves.Count == 0) {
+                bestMoves = bestLocalHeuristicMoves;
+            } else {
+                bestMoves = bestGlobalHeuristicMoves;
             }
             
             //Choose randomly between equivalent moves
-            return ((int x, int y))validMoves[Random.Range(0, validMoves.Count)];
+            return ((int x, int y))bestMoves[Random.Range(0, bestMoves.Count)];
         }
     }
 }

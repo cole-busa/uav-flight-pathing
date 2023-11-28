@@ -50,8 +50,8 @@ namespace Game {
             unitWidth = 19f / width;
             unitHeight = 7.6f / height;
             droneCount = 4;
-            maxIterations = 1;
-            withGraphics = true;
+            maxIterations = 100;
+            withGraphics = false;
             moveSpeed = 10f;
 
             //Game initialization.
