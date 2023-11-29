@@ -44,8 +44,8 @@ namespace Game {
         //Start is called before the first frame update.
         void Start() {
             //Game settings.
-            width = 10;
-            height = 10;
+            width = 50;
+            height = 50;
             unitWidth = 19f / width;
             unitHeight = 7.6f / height;
             droneCount = 4;
@@ -74,7 +74,7 @@ namespace Game {
             bottomRightCorner = new Vector3(9.5f, -3.8f, 0f);
 
             //Initialize variables based on settings.
-            string initialState = "GAME_SOLO_UNINFORMED";
+            string initialState = "GAME_MULTI_QUADRANT_LIMITED_CORNER_DECENTLY_INFORMED_INFORMATION_DECAY_MOVING_GOAL";
             drone = new Drone(width, height, initialState);
             drones = new ArrayList();
             movesPerIteration = new ArrayList();
@@ -84,8 +84,8 @@ namespace Game {
             }
             
             if (withGraphics) {
-                renderingSolo = true;
-                renderingMulti = false;
+                renderingSolo = false;
+                renderingMulti = true;
             } else {
                 renderingSolo = false;
                 renderingMulti = false;
@@ -169,7 +169,7 @@ namespace Game {
             states.Add("GAME_WIN");
         }
 
-        //Update is called once per frame
+        //Update is called once per frame.
         void FixedUpdate() {
             //If graphics are enabled, render the respective games.
             if (withGraphics) {
@@ -181,7 +181,7 @@ namespace Game {
                 }
             }
 
-            //If we are not currently moving drones, find the next move
+            //If we are not currently moving drones, find the next move.
             if (!renderingSolo && !renderingMulti) {
                 string state = gameState.GetState();
                 GenericGame(state);
@@ -213,23 +213,23 @@ namespace Game {
 
         void RenderMultiGame() {
             //Move the drone GameObjects toward each drone's actual position.
-            //Drone 1
+            //Drone 1:
             Vector3 pos1 = new Vector3(((Drone) drones[0]).GetPosX() * unitWidth - 9.5f, ((Drone) drones[0]).GetPosY() * unitHeight - 3.8f, 0f);
             linkedObjects[0].position = Vector3.MoveTowards(linkedObjects[0].position, pos1, moveSpeed * Time.deltaTime);
 
-            //Drone 2
+            //Drone 2:
             Vector3 pos2 = new Vector3(((Drone)drones[1]).GetPosX() * unitWidth - 9.5f, ((Drone)drones[1]).GetPosY() * unitHeight - 3.8f, 0f);
             linkedObjects[1].position = Vector3.MoveTowards(linkedObjects[1].position, pos2, moveSpeed * Time.deltaTime);
 
-            //Drone 3
+            //Drone 3:
             Vector3 pos3 = new Vector3(((Drone)drones[2]).GetPosX() * unitWidth - 9.5f, ((Drone)drones[2]).GetPosY() * unitHeight - 3.8f, 0f);
             linkedObjects[2].position = Vector3.MoveTowards(linkedObjects[2].position, pos3, moveSpeed * Time.deltaTime);
 
-            //Drone 4
+            //Drone 4:
             Vector3 pos4 = new Vector3(((Drone)drones[3]).GetPosX() * unitWidth - 9.5f, ((Drone)drones[3]).GetPosY() * unitHeight - 3.8f, 0f);
             linkedObjects[3].position = Vector3.MoveTowards(linkedObjects[3].position, pos4, moveSpeed * Time.deltaTime);
 
-            //If every drone has reached its destination
+            //If every drone has reached its destination:
             if (pos1 == linkedObjects[0].position && pos2 == linkedObjects[1].position
                 && pos3 == linkedObjects[2].position && pos4 == linkedObjects[3].position) {
                 //If one of the drones is at the goal, reset the current iteration, stop rendering, and return.
@@ -256,14 +256,14 @@ namespace Game {
             }
         }
 
-        //Generic game helper function that deals with resetting iterations and telling which game to play
+        //Generic game helper function that deals with resetting iterations and telling which game to play.
         void GenericGame(string state) {
-            //If the game is over, return
+            //If the game is over, return.
             if (state == "GAME_WIN" || stateIndex >= states.Count - 1)
                     return;
 
-            //If we are at the max iterations
-            if (iterations == maxIterations) {
+            //If we are at the max iterations or move count is greater than 1500:
+            if (iterations == maxIterations || moveCount > 1500) {
                 //Calculate the average moves over the scenario and print them to the console.
                 int averageMoves = FindAverageMoves();
                 Debug.Log("THE " + state + " SCENARIO TOOK " + averageMoves + " AVERAGE MOVES!");
@@ -285,7 +285,7 @@ namespace Game {
                 PlayMultiGame(state);
         }
 
-        //Helper function to calculate the average moves over all iterations
+        //Helper function to calculate the average moves over all iterations.
         int FindAverageMoves() {
             int sum = 0;
 
@@ -296,7 +296,7 @@ namespace Game {
             return averageMoves;
         }
 
-        //Helper function to reset the current iteration
+        //Helper function to reset the current iteration.
         void ResetIteration(string state, bool hardReset) {
             if (state == "GAME_WIN") {
                 //If the game is over, move all GameObjects to the unrendered position if we are using graphics. Return either way.

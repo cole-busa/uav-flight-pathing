@@ -124,8 +124,12 @@ namespace Game {
         //be added to each to simulate uncertainty. If the accuracy is bad, the goal will
         //actually be a false goal, simulating bad information.
         public void SetEuclideanDistanceGlobalHeuristic(string accuracy, (int x, int y) target) {
+            (int x, int y) heuristicGoal;
+
             if (accuracy == "bad") {
-                goal = target;
+                heuristicGoal = target;
+            } else {
+                heuristicGoal = goal;
             }
             for (int x = 0; x < globalHeuristics.GetLength(1); x++) {
                 for (int y = 0; y < globalHeuristics.GetLength(0); y++) {
@@ -133,7 +137,7 @@ namespace Game {
                     if (accuracy == "decent") {
                         random = Random.Range(-5.0f, 5.0f);
                     }
-                    globalHeuristics[y, x] = Mathf.Sqrt(Mathf.Pow(x - goal.x, 2) + Mathf.Pow(y - goal.y,2)) + random;
+                    globalHeuristics[y, x] = Mathf.Sqrt(Mathf.Pow(x - heuristicGoal.x, 2) + Mathf.Pow(y - heuristicGoal.y,2)) + random;
                 }
             }
         }
