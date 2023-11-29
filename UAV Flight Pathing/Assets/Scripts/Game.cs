@@ -44,13 +44,13 @@ namespace Game {
         //Start is called before the first frame update.
         void Start() {
             //Game settings.
-            width = 50;
-            height = 50;
+            width = 30;
+            height = 30;
             unitWidth = 19f / width;
             unitHeight = 7.6f / height;
             droneCount = 4;
-            maxIterations = 100;
-            withGraphics = false;
+            maxIterations = 1;
+            withGraphics = true;
             moveSpeed = 10f;
 
             //Game initialization.
@@ -74,7 +74,7 @@ namespace Game {
             bottomRightCorner = new Vector3(9.5f, -3.8f, 0f);
 
             //Initialize variables based on settings.
-            string initialState = "GAME_MULTI_QUADRANT_LIMITED_CORNER_DECENTLY_INFORMED_INFORMATION_DECAY_MOVING_GOAL";
+            string initialState = "GAME_SOLO_UNINFORMED";
             drone = new Drone(width, height, initialState);
             drones = new ArrayList();
             movesPerIteration = new ArrayList();
