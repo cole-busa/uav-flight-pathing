@@ -93,6 +93,7 @@ namespace Game {
             UpdateExploredHeuristics(localTimesExplored);
         }
 
+        //Getters and Setters for local variables.
         public int GetPosX() {
             return posX;
         }
@@ -107,6 +108,10 @@ namespace Game {
 
         public float[,] GetLocalHeuristics() {
             return localHeuristics;
+        }
+
+        public void SetLocalHeuristics(float[,] localHeuristics) {
+            this.localHeuristics = localHeuristics;
         }
 
         //Function to set the playzone of a quadrant limited drone.
@@ -144,11 +149,7 @@ namespace Game {
 
         }
 
-        public void SetLocalHeuristics(float[,] localHeuristics) {
-            this.localHeuristics = localHeuristics;
-        }
-
-        //Helper function to update a heuristic based on the number of surrounding explored tiles of each tile.
+        //Helper function to update the local explored heuristic based on the sum of the times explored for each tile and its surrounding tiles.
         public void UpdateExploredHeuristics(int[,] globalTimesExplored) {
             //If we are not informed, we do not care about the global times explored.
             if (!informed)
