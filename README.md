@@ -142,3 +142,7 @@ The average move count for this scenario is 135 moves. This is a tremendous impr
 - Moving Goal Scenarios
     - Limited drones to quadrants ensures equal division of search space
     - Information decay turns a good heuristic great
+
+## Try it out!
+
+If you want to try it for yourself, you can download this repository and open it with Unity 2022.3.12f1. The default settings are 30 x 30 grid with 1 max iteration and graphics turned on. This allows you to see all the scenarios play out one after the other. If you want to collect the data yourself or see how I did it, simply change it to a 50 x 50 grid with 100 max iterations and graphics off. Let it play out and eventually the average moves will be printed to console.
