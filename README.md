@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-Hello! This is my final project for my Systems of Networks class. :grinning: 
+Hello! This is my final project for my Principles of Networks class. :grinning: 
 
 This project aims to find the optimal pathing algorithm for a system of drones to find a given target. Each drone will have access to the spaces adjacent to them as well as a heuristics and times explored array. These will be utilized by the different algorithms to solve different problems more efficiently. For all uninformed drones, they will attempt to move to a space that minimizes the number of times it and its surrounding tiles has been explored. To determine if an algorithm is more optimal than another we will examine how many moves it takes on average to reach the goal. If there are multiple drones, we will consider one move as all of them moving once, since we want to minimize time, not work. Each move count listed will be the average from a 50 x 50 arena and 100 iterations.
 
@@ -122,7 +122,7 @@ The average move count for this scenario is 176 moves. It performs slightly bett
 
 #### Scenario 13: Multiple Quadrant-Limited Decently Euclidean Informed Drones at Corners with Information Decay and a Moving Goal
 
-To even further improve performance, we can stop using our heuristic function after a certain number of moves and return to our uninformed times explored minimization heuristic. The number of moves I chose was when the ratio of the fastest possible route to the center of the arena to the current move count was less than a random float between 0.5 and 1. This means that after between the number of moves to make it to the center and two times this value, we no longer care about our informed heuristic. We essentially realize after we are moving for a bit and still haven't found the goal that our initial heuristic is no longer useful since clearly the target is moving.
+To even further improve performance, we can stop using our heuristic function after a certain number of moves and return to our uninformed times explored minimization heuristic. The number of moves I chose was when the ratio of the fastest possible route to the center of the arena to the current move count was less than a random float between 0.5 and 1. This means that after between the number of moves to make it to the center and two times this value, we no longer care about our informed heuristic. We essentially realize after we are moving for some time and still haven't found the goal that our initial heuristic is no longer useful.
 
 ![plot](./UAV-Flight-Pathing/Media/multi_corner_quadrant_limited_decently_informed_information_decay_moving_goal.gif)
 
@@ -133,16 +133,9 @@ The average move count for this scenario is 135 moves. This is a tremendous impr
 ![plot](./UAV-Flight-Pathing/Media/Figure_4.png)
 
 ### Conclusions 
-- Uninformed Scenarios
-    - The more drones, the better.
-    - Deploying at corners is most reliable and feasible
-- Informed Scenarios
-    - Euclidean distance outperforms Manhattan distance
-    - Information accuracy is key
-- Moving Goal Scenarios
-    - Limited drones to quadrants ensures equal division of search space
-    - Information decay turns a good heuristic great
+
+Throughout this simulation, we have learned that drones swarms outperform single drones. Corner-deployment is most reliable and feasible in a real-life scenario. Euclidean distance outperforms Manhattan distance, and information accuracy is critical to performance. When the target starts to move, dividing drones by quadrants ensures equal ground coverage, and information decay turns a good heuristic into a great one. In conclusion, optimizing drone swarm performance lies in leveraging communication as a conduit for adapting to the ever-changing landscape of available information, proving its versatility and potential for success across diverse environments.
 
 ## Try it out!
 
-If you want to try it for yourself, you can download this repository and open it with Unity 2022.3.12f1. The default settings are 30 x 30 grid with 1 max iteration and graphics turned on. This allows you to see all the scenarios play out one after the other. If you want to collect the data yourself or see how I did it, simply change it to a 50 x 50 grid with 100 max iterations and graphics off. Let it play out and eventually the average moves will be printed to console.
+If you want to try it for yourself, you can download this repository and open it with Unity 2022.3.12f1. The default settings are 30 x 30 grid with 1 max iteration and graphics turned on. This allows you to see all the scenarios play out one after the other. If you want to collect the data yourself or see how I did it, simply change it to a 50 x 50 grid with 100 max iterations and graphics off. Let it play out and eventually the average moves will be printed to console. Thank you for reading this far and checking out my project! :grin:
