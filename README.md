@@ -1,12 +1,16 @@
 # UAV Flight Pathing
 
-## Project Overview
+## Project Overview:
 
 Hello! This is my final project for my Principles of Networks class. :grinning: 
 
 This project aims to find the optimal pathing algorithm for a system of drones to find a given target. Each drone will have access to the spaces adjacent to them as well as a heuristics and times explored array. These will be utilized by the different algorithms to solve different problems more efficiently. For all uninformed drones, they will attempt to move to a space that minimizes the number of times it and its surrounding tiles has been explored. To determine if an algorithm is more optimal than another we will examine how many moves it takes on average to reach the goal. If there are multiple drones, we will consider one move as all of them moving once, since we want to minimize time, not work. Each move count listed will be the average from a 50 x 50 arena and 100 iterations.
 
-## In Action
+## The Code:
+
+Documentation for the C# code can be found [here](./UAV-Flight-Pathing/Assets/Scripts/).
+
+## In Action:
 
 ### Scenarios 1-5: Uninformed
 
@@ -138,4 +142,4 @@ Throughout this simulation, we have learned that drones swarms outperform single
 
 ## Try it out!
 
-If you want to try it for yourself, you can download this repository and open it with Unity 2022.3.12f1. The default settings are 30 x 30 grid with 1 max iteration and graphics turned on. This allows you to see all the scenarios play out one after the other. If you want to collect the data yourself or see how I did it, simply change it to a 50 x 50 grid with 100 max iterations and graphics off. Let it play out and eventually the average moves will be printed to console. Thank you for reading this far and checking out my project! :grin:
+If you want to try it for yourself, you can download this repository and open it with Unity 2022.3.12f1. Simply press the play button in the top middle and it will start running. The default settings are 30 x 30 grid with 1 max iteration and graphics turned on. This allows you to see all the scenarios play out one after the other. If you want to collect the data yourself or see how I did it, simply change it to a 50 x 50 grid with 100 max iterations and graphics off. Let it play out and eventually the average moves will be printed to console. Thank you for reading this far and checking out my project! :grin:
